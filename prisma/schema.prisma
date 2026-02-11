@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  ORGANIZER
+  INVESTOR
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  WALLET_CREATED
+  FUNDING_OPEN
+  FUNDED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DistributionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+model User {
+  id        String   @id @default(cuid())
+  address   String   @unique // Stellar public key
+  role      UserRole @default(INVESTOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  organizedEvents Event[]      @relation("Organizer")
+  investments     Investment[]
+
+  @@map("users")
+}
+
+model Event {
+  id                     String      @id @default(cuid())
+  name                   String
+  description            String?
+  fundingGoal            Decimal     @db.Decimal(18, 7) // USDC amount
+  tokenPrice             Decimal     @db.Decimal(18, 7) // Price per token in USDC
+  revenueSharePct        Decimal     @db.Decimal(5, 2)  // Percentage (0-100)
+  status                 EventStatus @default(DRAFT)
+  stellarPublicKey       String?     @unique
+  stellarSecretEncrypted String?     // AES-256-CBC encrypted
+  assetCode              String?     // e.g., "EVT001"
+  totalTokensIssued      Decimal     @default(0) @db.Decimal(18, 7)
+  totalRevenue           Decimal     @default(0) @db.Decimal(18, 7)
+  ticketPrice            Decimal?    @db.Decimal(18, 7) // Price per ticket in USDC
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  // Relations
+  organizerId   String
+  organizer     User           @relation("Organizer", fields: [organizerId], references: [id])
+  investments   Investment[]
+  distributions Distribution[]
+  tickets       Ticket[]
+
+  @@index([status])
+  @@index([organizerId])
+  @@map("events")
+}
+
+model Investment {
+  id              String   @id @default(cuid())
+  amountTokens    Decimal  @db.Decimal(18, 7)
+  usdcPaid        Decimal  @db.Decimal(18, 7)
+  stellarTxHash   String?  // Transaction hash for traceability
+  createdAt       DateTime @default(now())
+
+  // Relations
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id])
+  investorAddress String
+  investor        User     @relation(fields: [investorAddress], references: [address])
+
+  @@index([eventId])
+  @@index([investorAddress])
+  @@map("investments")
+}
+
+model Distribution {
+  id             String             @id @default(cuid())
+  totalAmount    Decimal            @db.Decimal(18, 7) // Total USDC distributed
+  payoutPerToken Decimal            @db.Decimal(18, 7)
+  status         DistributionStatus @default(PENDING)
+  stellarTxHash  String?            @unique // Idempotency key
+  error          String?
+  createdAt      DateTime           @default(now())
+  completedAt    DateTime?
+
+  // Relations
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([status])
+  @@map("distributions")
+}
+
+model Ticket {
+  id            String   @id @default(cuid())
+  buyerAddress  String   // Stellar public key of ticket buyer
+  usdcPaid      Decimal  @db.Decimal(18, 7)
+  stellarTxHash String?  @unique // Transaction hash for verification
+  createdAt     DateTime @default(now())
+
+  // Relations
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([buyerAddress])
+  @@map("tickets")
+}

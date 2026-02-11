@@ -1,0 +1,94 @@
+================================================================================
+                           LUMIO-CORE - RESUMEN FINAL
+================================================================================
+
+Estado: Fases 1-4 Completadas.
+
+Seguridad: Claves cifradas con AES-256-CBC.
+
+Stellar: Motor de distribución y Atomic Swaps listos para Testnet.
+
+Pendiente: Integración con Frontend (lumio-pay).
+
+================================================================================
+                              DETALLES TÉCNICOS
+================================================================================
+
+ESTRUCTURA DEL PROYECTO:
+------------------------
+src/
+├── api/routes/events.ts      - 15 endpoints REST
+├── services/
+│   ├── stellar.service.ts    - Wallet, assets, transacciones
+│   ├── event.service.ts      - CRUD y estados
+│   ├── investment.service.ts - Atomic swaps
+│   ├── revenue.service.ts    - Tracking de ventas
+│   └── distribution.service.ts - Payout a inversores
+├── lib/
+│   ├── crypto.ts             - AES-256-CBC
+│   ├── stellar.ts            - Horizon helpers
+│   └── logger.ts             - Logging estructurado
+└── models/                   - Prisma client
+
+MODELOS DE DATOS:
+-----------------
+- User (address, role)
+- Event (fundingGoal, tokenPrice, revenueSharePct, stellarPublicKey)
+- Investment (amountTokens, usdcPaid, stellarTxHash)
+- Distribution (totalAmount, payoutPerToken, status)
+- Ticket (buyerAddress, usdcPaid, stellarTxHash)
+
+ENDPOINTS DISPONIBLES:
+----------------------
+POST   /api/events                    - Crear evento
+GET    /api/events                    - Listar eventos
+GET    /api/events/:id                - Obtener evento
+POST   /api/events/:id/wallet         - Inicializar wallet Stellar
+POST   /api/events/:id/fund           - Fondear con Friendbot
+POST   /api/events/:id/setup-asset    - Configurar asset + USDC trustline
+POST   /api/events/:id/open-funding   - Abrir financiamiento
+POST   /api/events/:id/invest         - Generar XDR de compra
+GET    /api/events/:id/revenue        - Estadísticas de revenue
+GET    /api/events/:id/payout-preview - Preview de distribución
+POST   /api/events/:id/distribute     - Ejecutar payout
+GET    /api/events/:id/distributions  - Historial de distribuciones
+
+DOCUMENTACIÓN:
+--------------
+.lumio/ARCHITECTURE.md    - Arquitectura y diagramas
+.lumio/API_SPEC.md        - Especificación API para frontend
+.lumio/STELLAR_FLOWS.md   - Flujos de operaciones Stellar
+.lumio/ROADMAP_STATUS.md  - Estado y log de sesiones
+
+================================================================================
+                              COMANDOS DE USO
+================================================================================
+
+# Instalación
+npm install
+docker compose up -d
+cp .env.example .env
+# Editar .env con ENCRYPTION_KEY válida (64 hex chars)
+
+# Base de datos
+npm run db:push
+npm run db:seed
+
+# Desarrollo
+npm run dev
+
+# Demo completa
+npm run demo
+
+================================================================================
+                                 VERSIONES
+================================================================================
+
+Node.js: >=20.0.0
+Stellar SDK: ^12.0.0
+Prisma: ^5.10.0
+Red Stellar: Testnet
+
+================================================================================
+                           LumioCorp - Febrero 2026
+================================================================================
