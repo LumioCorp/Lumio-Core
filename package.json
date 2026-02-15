@@ -1,45 +1,16 @@
 {
-  "name": "@lumiocorp/lumio-core",
+  "name": "lumio",
   "version": "0.1.0",
-  "description": "Plataforma de tokenización de eventos en Stellar",
-  "main": "dist/index.js",
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
-    "demo": "tsx src/lib/demo-runner.ts",
-    "lint": "eslint src --ext .ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "keywords": [
-    "stellar",
-    "crowdfunding",
-    "events",
-    "tokenization"
-  ],
-  "author": "LumioCorp",
-  "license": "UNLICENSED",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:core": "npm run dev -w @lumiocorp/lumio-core",
+    "dev:web": "npm run dev -w @lumiocorp/lumio-web",
+    "build:web": "npm run build -w @lumiocorp/lumio-web"
+  },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.10.0",
-    "@stellar/stellar-sdk": "^12.0.0",
-    "dotenv": "^16.4.0",
-    "express": "^4.18.0",
-    "zod": "^3.22.0"
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.11.0",
-    "prisma": "^5.10.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.0"
   }
 }

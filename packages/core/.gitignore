@@ -3,8 +3,6 @@ node_modules/
 
 # Build
 dist/
-.next/
-out/
 
 # Environment
 .env
@@ -34,4 +32,3 @@ coverage/
 # Misc
 *.tgz
 .cache/
-.vercel
