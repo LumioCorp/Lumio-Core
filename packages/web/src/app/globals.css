@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #EBEFF2;
+  --bg-card: #FFFFFF;
+  --icon-default: #8B8C8C;
+  --color-dominant: #010221;
+  --color-dominant-hover: #0A0A3A;
+  --text-primary: #010221;
+  --text-secondary: #8B8C8C;
+  --text-tertiary: #B0B3B8;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --border: #E2E5E9;
+  --accent-blue: #3B82F6;
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-card: var(--bg-card);
+  --color-icon-default: var(--icon-default);
+  --color-dominant: var(--color-dominant);
+  --color-dominant-hover: var(--color-dominant-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-border: var(--border);
+  --color-accent-blue: var(--accent-blue);
+
+  --font-sans: var(--font-dm-sans);
+
+  --shadow-card: 0 1px 3px rgba(1, 2, 33, 0.06);
+  --shadow-elevated: 0 4px 12px rgba(1, 2, 33, 0.1);
+
+  --radius-card: 12px;
+  --radius-btn: 8px;
+
+  --spacing-card: 24px;
+  --spacing-sidebar: 260px;
+  --spacing-page: 32px;
+  --spacing-gap: 20px;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-dm-sans), sans-serif;
+}
