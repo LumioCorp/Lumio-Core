@@ -10,7 +10,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-bg-primary">
+      <div className="min-h-screen bg-app-grid">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="lg:pl-[260px]">

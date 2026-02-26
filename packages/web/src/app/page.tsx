@@ -6,12 +6,12 @@ import Footer from "@/components/landing/Footer";
 
 export default function Home() {
   return (
-    <>
+    <div className="bg-white">
       <Hero />
       <HowItWorks />
       <Features />
       <LiveEventsPreview />
       <Footer />
-    </>
+    </div>
   );
 }

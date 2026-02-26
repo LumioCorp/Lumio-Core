@@ -1,88 +1,518 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Activity, TrendingUp, DollarSign } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Plus, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-import StatCard from "@/components/dashboard/StatCard";
-import StatusBadge from "@/components/dashboard/StatusBadge";
-import ProgressBar from "@/components/dashboard/ProgressBar";
 import { organizerStats, events, myOrganizedEvents } from "@/data/mock";
-import { formatUSDC, fundingPercent } from "@/lib/utils";
+import { formatUSDC, formatDate } from "@/lib/utils";
+import { ChartSparkline, ChartAreaInteractive } from "@/components/ui/Chart";
+import { ChartPieDonut } from "@/components/ui/ChartDonut";
+import { Progress } from "@/components/ui/Progress";
+import type { EventStatus, LumioEvent } from "@/types";
 
-export default function OrganizerOverview() {
-  const orgEvents = events.filter((e) => myOrganizedEvents.includes(e.id));
+// ─────────────────────────────────────────────────────────────────────────────
+// Datos de tendencia sintéticos — reemplazar por datos reales de la API
+// ─────────────────────────────────────────────────────────────────────────────
+const SPARKLINES = {
+  totalRaised:  [{ value: 0 }, { value: 0 }, { value: 3_200 }, { value: 4_000 }, { value: 7_200 }, { value: 9_000 }],
+  activeEvents: [{ value: 0 }, { value: 1 }, { value: 1 }, { value: 2 }, { value: 2 }, { value: 1 }],
+  ticketsSold:  [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }, { value: 600 }, { value: 600 }],
+  totalRevenue: [{ value: 0 }, { value: 0 }, { value: 0 }, { value: 0 }, { value: 12_000 }, { value: 12_000 }],
+};
+
+// Datos de fondos recaudados con rangos de tiempo
+const FUNDS_CHART_DATA: Record<"7d" | "30d" | "90d", { date: string; value: number }[]> = {
+  "7d": [
+    { date: "Feb 18", value: 8_200 },
+    { date: "Feb 19", value: 8_400 },
+    { date: "Feb 20", value: 8_700 },
+    { date: "Feb 21", value: 8_700 },
+    { date: "Feb 22", value: 8_900 },
+    { date: "Feb 24", value: 9_000 },
+    { date: "Feb 25", value: 9_000 },
+  ],
+  "30d": [
+    { date: "Jan 27", value: 3_200 },
+    { date: "Feb 01", value: 4_000 },
+    { date: "Feb 05", value: 5_500 },
+    { date: "Feb 10", value: 6_800 },
+    { date: "Feb 14", value: 7_200 },
+    { date: "Feb 18", value: 8_200 },
+    { date: "Feb 21", value: 8_700 },
+    { date: "Feb 25", value: 9_000 },
+  ],
+  "90d": [
+    { date: "Nov 25", value: 0 },
+    { date: "Dec 08", value: 0 },
+    { date: "Dec 22", value: 1_000 },
+    { date: "Jan 05", value: 2_000 },
+    { date: "Jan 19", value: 3_200 },
+    { date: "Feb 02", value: 4_000 },
+    { date: "Feb 09", value: 6_000 },
+    { date: "Feb 14", value: 7_200 },
+    { date: "Feb 18", value: 8_200 },
+    { date: "Feb 21", value: 8_700 },
+    { date: "Feb 25", value: 9_000 },
+  ],
+};
+
+// Distribución de eventos por estado para el donut
+const EVENTS_DONUT = [
+  { name: "Funding Open",  value: 3_800, fill: "#3b82f6" },
+  { name: "Funded",        value: 5_200, fill: "#8b5cf6" },
+  { name: "Completed",     value: 9_000, fill: "#10b981" },
+];
+
+type TimeRange = "7d" | "30d" | "90d";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hook: cuenta progresiva con ease-out cúbico
+// ─────────────────────────────────────────────────────────────────────────────
+function useCountUp(target: number, duration = 960) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    const STEPS = 40;
+    const interval = duration / STEPS;
+    let i = 0;
+    const id = setInterval(() => {
+      i++;
+      setVal(target * (1 - Math.pow(1 - i / STEPS, 3)));
+      if (i >= STEPS) { clearInterval(id); setVal(target); }
+    }, interval);
+    return () => clearInterval(id);
+  }, [target, duration]);
+  return val;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KPI Card — stat + Recharts sparkline + badge de tendencia
+// ─────────────────────────────────────────────────────────────────────────────
+interface KpiCardProps {
+  uid: string;
+  label: string;
+  target: number;
+  unit?: string;
+  isInt?: boolean;
+  sparkData: { value: number }[];
+  color: string;
+  trendLabel: string;
+  trendUp: boolean;
+  delay?: number;
+}
+
+function KpiCard({
+  uid, label, target, unit, isInt = false,
+  sparkData, color, trendLabel, trendUp, delay = 0,
+}: KpiCardProps) {
+  const raw = useCountUp(target);
+  const display = isInt
+    ? Math.round(raw).toLocaleString("en-US")
+    : raw.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-[var(--spacing-gap)] sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={CalendarDays} title="Events Created" value="" numericValue={organizerStats.totalEventsCreated} />
-        <StatCard icon={Activity} title="Active Events" value="" numericValue={organizerStats.activeEvents} />
-        <StatCard icon={TrendingUp} title="Total Funds Raised" value="" numericValue={organizerStats.totalFundsRaised} prefix="$" suffix=" USDC" />
-        <StatCard icon={DollarSign} title="Total Revenue" value="" numericValue={organizerStats.totalRevenue} prefix="$" suffix=" USDC" />
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
+    >
+      {/* Etiqueta + badge de tendencia */}
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          {label}
+        </span>
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+          <ArrowUpRight className="h-2.5 w-2.5" />
+          {trendLabel}
+        </span>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="rounded-[var(--radius-card)] border border-border bg-bg-card p-6 shadow-card"
-      >
-        <h2 className="text-base font-bold text-text-primary mb-4">My Events</h2>
-        <div className="space-y-4">
-          {orgEvents.map((event) => {
-            const pct = fundingPercent(event.totalFunded, event.fundingTarget);
-            return (
-              <Link
-                key={event.id}
-                href={`/dashboard/organizer/event/${event.id}`}
-                className="flex items-center justify-between rounded-lg border border-border p-4 hover:shadow-elevated transition-shadow"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-medium text-text-primary truncate">{event.name}</h3>
-                    <StatusBadge status={event.status} />
-                  </div>
-                  {event.status === "funding_open" && (
-                    <div className="mt-1 max-w-xs">
-                      <ProgressBar value={pct} />
-                      <span className="text-xs text-text-secondary mt-0.5 block">{pct}% funded</span>
-                    </div>
-                  )}
-                  {(event.status === "event_executed" || event.status === "distribution_executed") && (
-                    <p className="text-sm text-text-secondary">Revenue: {formatUSDC(event.totalRevenue)} USDC</p>
-                  )}
-                </div>
-                <div className="text-sm text-text-secondary ml-4">
-                  {event.investorCount} investors &middot; {event.tokensSold} tokens sold
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </motion.div>
+      {/* Valor principal */}
+      <div className="flex items-baseline gap-1.5 mb-4">
+        <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2rem] font-bold leading-none tracking-tight text-slate-900 tabular-nums">
+          {display}
+        </span>
+        {unit && (
+          <span className="text-sm font-semibold text-slate-400 leading-none pb-0.5">
+            {unit}
+          </span>
+        )}
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="rounded-[var(--radius-card)] border border-border bg-bg-card p-6 shadow-card"
+      {/* Recharts sparkline: se extiende hasta los bordes */}
+      <div className="-mx-5 -mb-5 mt-auto">
+        <ChartSparkline data={sparkData} color={color} uid={uid} />
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Átomo de métrica — label + valor en pares compactos
+// ─────────────────────────────────────────────────────────────────────────────
+function Metric({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-0.5">
+        {label}
+      </p>
+      <p className={`text-sm ${bold ? "font-bold text-slate-900" : "font-semibold text-slate-600"}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Etiquetas y estilos operativos por estado del evento
+// ─────────────────────────────────────────────────────────────────────────────
+const OPERATIONAL_LABELS: Record<EventStatus, string> = {
+  funding_open:          "Funding",
+  funding_successful:    "Ready to Execute",
+  event_executed:        "Event Live",
+  liquidation_countdown: "Liquidation",
+  distribution_executed: "Completed",
+  cancelled:             "Cancelled",
+};
+
+const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; pulse?: string }> = {
+  funding_open:          { bg: "bg-blue-50",    text: "text-blue-600",    pulse: "bg-blue-400"   },
+  funding_successful:    { bg: "bg-violet-50",  text: "text-violet-600",  pulse: "bg-violet-400" },
+  event_executed:        { bg: "bg-amber-50",   text: "text-amber-600",   pulse: "bg-amber-400"  },
+  liquidation_countdown: { bg: "bg-orange-50",  text: "text-orange-600",  pulse: "bg-orange-400" },
+  distribution_executed: { bg: "bg-emerald-50", text: "text-emerald-600"                         },
+  cancelled:             { bg: "bg-red-50",     text: "text-red-500"                             },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Organizer Event Card — con Progress bar y h-full
+// ─────────────────────────────────────────────────────────────────────────────
+function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number }) {
+  const fundedPct   = Math.round((event.totalFunded / event.fundingTarget) * 100);
+  const label       = OPERATIONAL_LABELS[event.status];
+  const style       = STATUS_STYLES[event.status];
+  const hasPulse    = !!style.pulse;
+
+  const isFunding   = event.status === "funding_open";
+  const isFunded    = event.status === "funding_successful";
+  const isLive      = event.status === "event_executed";
+  const isCompleted = event.status === "distribution_executed";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay: 0.22 + index * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      className="h-full"
+    >
+      <Link
+        href={`/dashboard/organizer/event/${event.id}`}
+        className="group flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-200 hover:shadow-md"
       >
-        <h2 className="text-base font-bold text-text-primary mb-4">Recent Activity</h2>
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="mt-1.5 h-2 w-2 rounded-full bg-accent-blue shrink-0" />
+        {/* ── Cabecera ── */}
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[15px] font-semibold text-slate-900 transition-colors group-hover:text-dominant truncate">
+              {event.name}
+            </h3>
+            <p className="mt-0.5 text-[11px] text-slate-400 truncate">
+              {event.location} · {formatDate(event.eventDate)}
+            </p>
+          </div>
+
+          {/* Badge de estado operativo con pulso */}
+          <span
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${style.bg} ${style.text}`}
+          >
+            {hasPulse ? (
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${style.pulse}`} />
+                <span className={`relative inline-flex h-2 w-2 rounded-full ${style.pulse}`} />
+              </span>
+            ) : (
+              <span className={`h-2 w-2 rounded-full ${isCompleted ? "bg-emerald-400" : "bg-slate-300"}`} />
+            )}
+            {label}
+          </span>
+        </div>
+
+        {/* ── Progreso de fondeo con Progress component ── */}
+        {isFunding && (
+          <div className="mb-4 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-slate-400">Funding progress</span>
+              <span className="text-[11px] font-bold text-slate-600 tabular-nums">{fundedPct}%</span>
+            </div>
+            <Progress value={fundedPct} />
+            <p className="text-[11px] text-slate-400 tabular-nums">
+              ${formatUSDC(event.totalFunded)} of ${formatUSDC(event.fundingTarget)} USDC raised
+            </p>
+          </div>
+        )}
+
+        {/* ── Fondeo completado, listo para ejecutar ── */}
+        {isFunded && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl bg-violet-50 px-4 py-3">
+            <Zap className="h-4 w-4 shrink-0 text-violet-500" strokeWidth={2.2} />
             <div>
-              <p className="text-sm text-text-primary">BurgerFest San José 2026 — Funding at 64%</p>
+              <p className="text-xs font-bold text-violet-700">
+                Fully funded — ready to go live
+              </p>
+              <p className="mt-0.5 text-[11px] text-violet-500">
+                ${formatUSDC(event.totalFunded)} raised · {event.investorCount} investors on board
+              </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
-            <div className="mt-1.5 h-2 w-2 rounded-full bg-success shrink-0" />
-            <div>
-              <p className="text-sm text-text-primary">Festival de Tacos Cartago — Distribution completed. $12,000 revenue.</p>
+        )}
+
+        {/* ── Revenue — para event_executed y distribution_executed ── */}
+        {(isLive || isCompleted) && (
+          <div className="mb-4 rounded-xl bg-slate-50 px-4 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                {isCompleted ? "Total Revenue" : "Revenue Collected"}
+              </span>
+              <span
+                className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-bold tabular-nums ${
+                  isCompleted ? "text-emerald-600" : "text-amber-600"
+                }`}
+              >
+                ${formatUSDC(event.totalRevenue)} USDC
+              </span>
             </div>
+            {isCompleted && event.distribution && (
+              <p className="mt-1 text-[11px] text-slate-400">
+                You received ${formatUSDC(event.distribution.organizerReceived)} · {event.investorCount} investors paid out
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ── Métricas clave ── */}
+        <div className="grid grid-cols-3 gap-4 border-t border-slate-50 pt-4 mt-auto">
+          <Metric label="Investors"   value={`${event.investorCount}`} />
+          <Metric label="Tokens Sold" value={`${event.tokensSold}`} bold />
+          <Metric
+            label={isCompleted ? "Tickets Sold" : "Target"}
+            value={isCompleted
+              ? `${event.ticketsSold.toLocaleString("en-US")}`
+              : `$${formatUSDC(event.fundingTarget)}`
+            }
+          />
+        </div>
+
+        {/* ── Hover indicator ── */}
+        <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-medium text-slate-300 transition-colors group-hover:text-dominant">
+          <span>Manage event</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feed de actividad reciente — perspectiva organizador
+// ─────────────────────────────────────────────────────────────────────────────
+const ACTIVITY = [
+  {
+    type: "distribution",
+    text: "Festival de Tacos Cartago — Distribution sent to 15 investors",
+    date: "Feb 01",
+    amount: 3_492,
+  },
+  {
+    type: "revenue",
+    text: "Festival de Tacos Cartago — Revenue collected: $12,000 USDC",
+    date: "Jan 26",
+    amount: 12_000,
+  },
+  {
+    type: "funding",
+    text: "BurgerFest San José 2026 — Investor #8 joined the campaign",
+    date: "Feb 10",
+    amount: 100,
+  },
+] as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Página principal
+// ─────────────────────────────────────────────────────────────────────────────
+export default function OrganizerOverview() {
+  const [range, setRange] = useState<TimeRange>("30d");
+
+  const orgEvents    = events.filter((e) => myOrganizedEvents.includes(e.id));
+  const totalTickets = orgEvents.reduce((sum, e) => sum + e.ticketsSold, 0);
+
+  return (
+    <div className="space-y-8 pb-4">
+
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          uid="org-raised"
+          label="Total Raised"
+          target={organizerStats.totalFundsRaised}
+          unit="USDC"
+          sparkData={SPARKLINES.totalRaised}
+          color="#3b82f6"
+          trendLabel="+$6k this cycle"
+          trendUp
+          delay={0}
+        />
+        <KpiCard
+          uid="org-active"
+          label="Active Events"
+          target={organizerStats.activeEvents}
+          isInt
+          sparkData={SPARKLINES.activeEvents}
+          color="#8b5cf6"
+          trendLabel="1 in progress"
+          trendUp
+          delay={0.06}
+        />
+        <KpiCard
+          uid="org-tickets"
+          label="Tickets Sold"
+          target={totalTickets}
+          isInt
+          sparkData={SPARKLINES.ticketsSold}
+          color="#10b981"
+          trendLabel="600 total"
+          trendUp
+          delay={0.12}
+        />
+        <KpiCard
+          uid="org-revenue"
+          label="Total Revenue"
+          target={organizerStats.totalRevenue}
+          unit="USDC"
+          sparkData={SPARKLINES.totalRevenue}
+          color="#f59e0b"
+          trendLabel="From events"
+          trendUp
+          delay={0.18}
+        />
+      </div>
+
+      {/* ── Funds Overview ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+          {/* Funds Raised chart — ocupa 2 columnas en lg */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-2">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
+                  Funds Raised
+                </h2>
+                <p className="mt-0.5 text-[11px] text-slate-400">USDC raised across all events</p>
+              </div>
+
+              {/* Time range tabs */}
+              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+                {(["7d", "30d", "90d"] as TimeRange[]).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRange(r)}
+                    className={`rounded-lg px-3 py-1 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-150 ${
+                      range === r
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-400 hover:text-slate-700"
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <ChartAreaInteractive
+              data={FUNDS_CHART_DATA[range]}
+              color="#3b82f6"
+              uid={`funds-${range}`}
+            />
+          </div>
+
+          {/* Donut chart — Events by Status */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="mb-4">
+              <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
+                Events by Status
+              </h2>
+              <p className="mt-0.5 text-[11px] text-slate-400">USDC by lifecycle stage</p>
+            </div>
+            <ChartPieDonut data={EVENTS_DONUT} />
           </div>
         </div>
-      </motion.div>
+      </motion.section>
+
+      {/* ── My Events ── */}
+      <section>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-semibold text-slate-900">
+              My Events
+            </h2>
+            <p className="mt-0.5 text-sm text-slate-400">
+              {orgEvents.length} event{orgEvents.length !== 1 ? "s" : ""} · {organizerStats.activeEvents} active
+            </p>
+          </div>
+
+          {/* ── Botón destacado Create New Event ── */}
+          <Link
+            href="/dashboard/organizer/create"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-gradient-to-r from-dominant to-blue-400 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-dominant/20 transition-all duration-200 hover:opacity-90 hover:shadow-lg hover:shadow-dominant/30"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            Create New Event
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          {orgEvents.map((event, i) => (
+            <OrganizerEventCard key={event.id} event={event} index={i} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Recent Activity ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
+      >
+        <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-5 text-base font-semibold text-slate-900">
+          Recent Activity
+        </h2>
+
+        <div className="relative">
+          <div className="absolute left-[6px] top-2 bottom-3 w-px bg-slate-100" />
+          <div className="space-y-5">
+            {ACTIVITY.map((item, i) => (
+              <div key={i} className="relative flex items-start gap-4 pl-5">
+                <div className="absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full border-2 border-white bg-slate-300 shadow-sm" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 leading-snug">{item.text}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] text-slate-400">{item.date}</span>
+                    <span className="text-[11px] font-medium tabular-nums text-slate-500">
+                      +${formatUSDC(item.amount)} USDC
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
     </div>
   );
 }

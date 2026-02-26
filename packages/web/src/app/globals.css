@@ -14,6 +14,12 @@
   --danger: #EF4444;
   --border: #E2E5E9;
   --accent-blue: #3B82F6;
+  /* Chart palette */
+  --chart-1: #3b82f6;
+  --chart-2: #94a3b8;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #10b981;
 }
 
 @theme inline {
@@ -32,9 +38,11 @@
   --color-accent-blue: var(--accent-blue);
 
   --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-space-grotesk);
 
   --shadow-card: 0 1px 3px rgba(1, 2, 33, 0.06);
-  --shadow-elevated: 0 4px 12px rgba(1, 2, 33, 0.1);
+  --shadow-elevated: 0 4px 16px rgba(1, 2, 33, 0.08);
+  --shadow-sidebar: 1px 0 0 0 #f1f3f6;
 
   --radius-card: 12px;
   --radius-btn: 8px;
@@ -49,4 +57,17 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-dm-sans), sans-serif;
+}
+
+/* Fondo app: blanco puro con cuadrícula sutil */
+@utility bg-app-grid {
+  background-color: #ffffff;
+  background-image: radial-gradient(circle at 1px 1px, #dde2e9 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+/* Gradiente superior muy suave (alternativa al grid) */
+@utility bg-app-gradient {
+  background-color: #ffffff;
+  background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(59,130,246,0.05) 0%, transparent 70%);
 }
