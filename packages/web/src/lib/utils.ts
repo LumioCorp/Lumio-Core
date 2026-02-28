@@ -33,12 +33,12 @@ export function getCategoryGradient(category: EventCategory): string {
 
 export function getStatusConfig(status: EventStatus): { label: string; color: string; bg: string } {
   const config: Record<EventStatus, { label: string; color: string; bg: string }> = {
-    funding_open: { label: "Funding Open", color: "text-blue-700", bg: "bg-blue-100" },
-    funding_successful: { label: "Funded", color: "text-green-700", bg: "bg-green-100" },
-    event_executed: { label: "Event Executed", color: "text-amber-700", bg: "bg-amber-100" },
-    liquidation_countdown: { label: "Liquidation", color: "text-orange-700", bg: "bg-orange-100" },
-    distribution_executed: { label: "Completed", color: "text-green-700", bg: "bg-green-100" },
-    cancelled: { label: "Cancelled", color: "text-red-700", bg: "bg-red-100" },
+    funding_open: { label: "Funding Open", color: "text-blue-400", bg: "bg-blue-500/15" },
+    funding_successful: { label: "Funded", color: "text-green-400", bg: "bg-green-500/15" },
+    event_executed: { label: "Event Executed", color: "text-amber-400", bg: "bg-amber-500/15" },
+    liquidation_countdown: { label: "Liquidation", color: "text-orange-400", bg: "bg-orange-500/15" },
+    distribution_executed: { label: "Completed", color: "text-green-400", bg: "bg-green-500/15" },
+    cancelled: { label: "Cancelled", color: "text-red-400", bg: "bg-red-500/15" },
   };
   return config[status];
 }

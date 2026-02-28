@@ -4,9 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Wallet, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import LumioLogo from "@/components/ui/LumioLogo";
-import EventCard from "@/components/dashboard/EventCard";
-import { events } from "@/data/mock";
 import { useWallet } from "@/components/ui/WalletProvider";
 
 // ─── Botón "Connect Wallet" — navbar ─────────────────────────────────────────
@@ -29,12 +28,12 @@ function ConnectWalletButton() {
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-3.5 py-2 shadow-sm transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] disabled:opacity-60"
+      className="flex items-center gap-2 rounded-full border border-[#2E2832] bg-[#1E1820] px-3.5 py-2 shadow-sm transition-all hover:border-[#444F55] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] disabled:opacity-60"
     >
-      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100">
-        <Wallet className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.2} />
+      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#252028]">
+        <Wallet className="h-3.5 w-3.5 text-[#5A6068]" strokeWidth={1.2} />
       </div>
-      <span className="hidden text-sm font-medium tracking-[-0.01em] text-slate-700 sm:block">
+      <span className="hidden text-sm font-medium tracking-[-0.01em] text-[#E8EDEE] sm:block">
         {isLoading ? "Connecting..." : isConnected ? displayAddress : "Connect Wallet"}
       </span>
     </button>
@@ -43,45 +42,20 @@ function ConnectWalletButton() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Hero() {
-  const fundingOpen = events.filter((e) => e.status === "funding_open");
-  const card1 = fundingOpen[0] ?? events[0];
-  const card2 = fundingOpen[1] ?? events[1];
-
-  const { isConnected, isLoading, connect } = useWallet();
-  const router = useRouter();
-
-  const handleExplore = async () => {
-    if (isConnected) {
-      router.push("/dashboard/investor");
-      return;
-    }
-    const addr = await connect();
-    if (addr) {
-      router.push("/dashboard/investor");
-    }
-  };
-
   return (
-    <div className="bg-white">
+    <div className="bg-[#18121A]">
       {/* ── Navbar ─────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 border-b border-slate-100/80 bg-white/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-[#2E2832]/80 bg-[#18121A]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <LumioLogo size="md" />
 
           <div className="hidden items-center gap-7 md:flex">
-            {[
-              { label: "Explore Events", href: "/dashboard/investor/explore" },
-              { label: "My Portfolio",   href: "/dashboard/investor/portfolio" },
-              { label: "Create Event",   href: "/dashboard/organizer/create" },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="text-sm font-medium tracking-[-0.01em] text-slate-500 transition-colors hover:text-slate-900"
-              >
-                {label}
-              </Link>
-            ))}
+            <Link
+              href="/explore"
+              className="text-sm font-medium tracking-[-0.01em] text-[#8B9298] transition-colors hover:text-[#FBFBFC]"
+            >
+              Explore Events
+            </Link>
           </div>
 
           <ConnectWalletButton />
@@ -93,7 +67,7 @@ export default function Hero() {
         className="relative flex min-h-[90vh] items-center overflow-hidden px-6"
         style={{
           background:
-            "radial-gradient(ellipse 100% 60% at 50% -5%, rgba(219,234,254,0.45) 0%, white 65%)",
+            "radial-gradient(ellipse 100% 60% at 50% -5%, rgba(59,130,246,0.10) 0%, #18121A 65%)",
         }}
       >
         <div className="mx-auto w-full max-w-6xl py-20 lg:py-28">
@@ -109,7 +83,7 @@ export default function Hero() {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="inline-block"
               >
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-slate-400 shadow-sm">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#2E2832] bg-[#1E1820] px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#8B9298] shadow-sm">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   Live on Stellar Testnet
                 </span>
@@ -120,13 +94,13 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-7 font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.75rem] font-semibold leading-[1.08] tracking-[-0.03em] text-dominant sm:text-[3.5rem]"
+                className="mt-7 font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.75rem] font-semibold leading-[1.08] tracking-[-0.03em] text-[#FBFBFC] sm:text-[3.5rem]"
               >
                 Launch your event.
                 <br />
                 Fund your vision.
                 <br />
-                <span className="text-slate-400">On Stellar.</span>
+                <span className="text-[#5A6068]">On Stellar.</span>
               </motion.h1>
 
               {/* Subtitle */}
@@ -134,7 +108,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                className="mx-auto mt-6 max-w-md text-[1.0625rem] leading-relaxed tracking-[-0.01em] text-slate-400 lg:mx-0"
+                className="mx-auto mt-6 max-w-md text-[1.0625rem] leading-relaxed tracking-[-0.01em] text-[#8B9298] lg:mx-0"
               >
                 Lumio tokenizes real-world events so anyone can invest and share the revenue.
               </motion.p>
@@ -146,10 +120,9 @@ export default function Hero() {
                 transition={{ duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
               >
-                <button
-                  onClick={handleExplore}
-                  disabled={isLoading}
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-dominant to-blue-400 px-7 py-[13px] text-sm font-semibold tracking-[-0.01em] text-white shadow-md shadow-dominant/20 transition-opacity hover:opacity-90 disabled:opacity-60"
+                <Link
+                  href="/explore"
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-dominant to-blue-400 px-7 py-[13px] text-sm font-semibold tracking-[-0.01em] text-white shadow-md shadow-dominant/20 transition-opacity hover:opacity-90"
                 >
                   <motion.div
                     aria-hidden="true"
@@ -157,58 +130,69 @@ export default function Hero() {
                     animate={{ x: ["-130%", "230%"] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
                   />
-                  <span className="relative">
-                    {isLoading ? "Connecting..." : isConnected ? "Go to Dashboard" : "Explore Events"}
-                  </span>
+                  <span className="relative">Explore Events</span>
                   <ArrowRight className="relative h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={1.5} />
-                </button>
-
-                <Link
-                  href="/dashboard/organizer/create"
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-7 py-[13px] text-sm font-semibold tracking-[-0.01em] text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
-                >
-                  Create an Event
-                  <ArrowRight className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
                 </Link>
               </motion.div>
             </div>
 
-            {/* ── Right: Floating EventCards ── */}
-            <div className="relative hidden h-[560px] lg:block">
-              {/* Card 1 — arriba-izquierda */}
+            {/* ── Right: Floating Images ── */}
+            {/* ── Right: Floating Images ── */}
+            <div className="relative hidden h-[600px] lg:block">
+              {/* Image 1 — top-left, large */}
               <motion.div
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute left-0 top-0 w-[300px] overflow-hidden rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.10)]"
+                className="absolute left-0 top-0 z-10 w-[400px] overflow-hidden rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.50)]"
               >
-                <EventCard
-                  event={card1}
-                  href={`/dashboard/investor/event/${card1.id}`}
-                  index={0}
+                <Image
+                  src="/concierto.webp"
+                  alt="Live concert event"
+                  width={400}
+                  height={280}
+                  className="h-[280px] w-full object-cover"
                 />
               </motion.div>
 
-              {/* Card 2 — abajo-derecha, solapada */}
+              {/* Image 2 — center-right, overlapping */}
               <motion.div
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.62, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute bottom-0 right-0 w-[300px] overflow-hidden rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.10)]"
+                transition={{ duration: 0.7, delay: 0.58, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute right-0 top-[170px] z-20 w-[380px] overflow-hidden rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.50)]"
               >
-                <EventCard
-                  event={card2}
-                  href={`/dashboard/investor/event/${card2.id}`}
-                  index={0}
+                <Image
+                  src="/conferencia.webp"
+                  alt="Conference event"
+                  width={380}
+                  height={260}
+                  className="h-[260px] w-full object-cover"
                 />
               </motion.div>
 
-              {/* Glow suave detrás de las cards */}
+              {/* Image 3 — bottom-left, overlapping */}
+              <motion.div
+                initial={{ opacity: 0, y: 28 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute bottom-0 left-[10px] z-30 w-[360px] overflow-hidden rounded-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.50)]"
+              >
+                <Image
+                  src="/conferencia2.jpeg"
+                  alt="Conference event"
+                  width={360}
+                  height={250}
+                  className="h-[250px] w-full object-cover"
+                />
+              </motion.div>
+
+              {/* Glow behind images */}
               <div
-                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full"
+                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-72 rounded-full"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, rgba(59,130,246,0.08) 0%, transparent 70%)",
+                    "radial-gradient(ellipse at center, rgba(59,130,246,0.12) 0%, transparent 70%)",
                 }}
               />
             </div>
@@ -225,9 +209,9 @@ export default function Hero() {
             {["Trustless Escrow", "All-or-Nothing", "On-Chain Revenue"].map((badge, i) => (
               <span
                 key={badge}
-                className="flex items-center gap-2 text-[11px] tracking-[0.04em] text-slate-400"
+                className="flex items-center gap-2 text-[11px] tracking-[0.04em] text-[#5A6068]"
               >
-                {i > 0 && <span className="h-px w-3 bg-slate-200" />}
+                {i > 0 && <span className="h-px w-3 bg-[#2E2832]" />}
                 {badge}
               </span>
             ))}
@@ -245,7 +229,7 @@ export default function Hero() {
             animate={{ y: [0, 5, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <ChevronDown className="h-5 w-5 text-slate-300" strokeWidth={1.2} />
+            <ChevronDown className="h-5 w-5 text-[#444F55]" strokeWidth={1.2} />
           </motion.div>
         </motion.div>
       </section>

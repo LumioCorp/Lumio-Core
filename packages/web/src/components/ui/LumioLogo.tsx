@@ -3,6 +3,7 @@ import Image from "next/image";
 // ─── Logo oficial Lumio ───────────────────────────────────────────────────────
 // Usa Lumio-sinFondo-Negro.png (isotipo negro sobre transparente)
 // + wordmark "Lumio" en Space Grotesk Semibold alineado verticalmente.
+// En dark theme se invierte el isotipo para que sea blanco.
 
 type LogoSize = "sm" | "md" | "lg";
 
@@ -33,11 +34,11 @@ export default function LumioLogo({ size = "md", className }: LumioLogoProps) {
         alt="Lumio"
         height={h}
         width={w}
-        className="object-contain"
+        className="object-contain brightness-0 invert"
         priority
       />
       <span
-        className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] ${wordSize[size]} font-semibold leading-none tracking-[-0.03em] text-dominant`}
+        className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] ${wordSize[size]} font-semibold leading-none tracking-[-0.03em] text-[#FBFBFC]`}
       >
         Lumio
       </span>

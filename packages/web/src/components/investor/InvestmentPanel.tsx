@@ -16,7 +16,7 @@ const PCT_OPTIONS = [
 
 // ─── Separador estilo perforación de ticket ───────────────────────────────
 function Perforation() {
-  return <div className="my-5 border-t border-dashed border-slate-200" />;
+  return <div className="my-5 border-t border-dashed border-[#2E2832]" />;
 }
 
 // ─── Par label-valor estilo recibo ────────────────────────────────────────
@@ -31,10 +31,10 @@ function ReceiptRow({
 }) {
   return (
     <div className="flex items-center justify-between py-1.5">
-      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+      <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#5A6068]">
         {label}
       </span>
-      <span className={`text-sm font-semibold text-slate-800 tabular-nums ${valueClass}`}>
+      <span className={`text-sm font-semibold text-[#E8EDEE] tabular-nums ${valueClass}`}>
         {value}
       </span>
     </div>
@@ -44,8 +44,8 @@ function ReceiptRow({
 // ─── Footer con verificación Stellar ─────────────────────────────────────
 function StellarFooter() {
   return (
-    <div className="border-t border-slate-50 px-6 py-3">
-      <p className="text-center text-[10px] font-medium text-slate-300">
+    <div className="border-t border-[#252028] px-6 py-3">
+      <p className="text-center text-[10px] font-medium text-[#444F55]">
         ⬡ Verified on Stellar Testnet
       </p>
     </div>
@@ -81,28 +81,28 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
     const roiPositive = roi >= 0;
 
     return (
-      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] shadow-sm">
         {/* Cabecera del ticket */}
         <div className="px-6 pb-4 pt-6">
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-[#5A6068]">
               Investment Receipt
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-600">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-bold text-emerald-400">
               <CheckCircle2 className="h-3 w-3" />
               Payout Complete
             </span>
           </div>
-          <p className="mt-1 truncate text-[15px] font-semibold text-slate-900">
+          <p className="mt-1 truncate text-[15px] font-semibold text-[#FBFBFC]">
             {event.name}
           </p>
         </div>
 
         <Perforation />
 
-        {/* ROI — dato más importante, tamaño prominente */}
+        {/* ROI */}
         <div className="px-6 pb-4 text-center">
-          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#5A6068]">
             Final Return on Investment
           </p>
           <motion.div
@@ -112,14 +112,14 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
           >
             <span
               className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[3.25rem] font-bold leading-none tabular-nums ${
-                roiPositive ? "text-emerald-500" : "text-red-500"
+                roiPositive ? "text-emerald-400" : "text-red-400"
               }`}
             >
               {roiPositive ? "+" : ""}
               {roi.toFixed(1)}%
             </span>
           </motion.div>
-          <p className="mt-1.5 text-xs text-slate-400">
+          <p className="mt-1.5 text-xs text-[#8B9298]">
             from {formatUSDC(investment.totalInvested)} USDC invested
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
           <ReceiptRow
             label="Payout Received"
             value={`${formatUSDC(investment.actualPayout ?? 0)} USDC`}
-            valueClass="text-emerald-600 font-bold"
+            valueClass="text-emerald-400 font-bold"
           />
         </div>
 
@@ -150,20 +150,19 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
     const isLive = event.status === "event_executed";
 
     return (
-      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] shadow-sm">
         {/* Cabecera */}
         <div className="px-6 pb-4 pt-6">
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+            <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-[#5A6068]">
               Your Position
             </span>
 
-            {/* Badge con pulso de celebración */}
             <span
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
                 isLive
-                  ? "bg-amber-50 text-amber-600"
-                  : "bg-emerald-50 text-emerald-600"
+                  ? "bg-amber-500/15 text-amber-400"
+                  : "bg-emerald-500/15 text-emerald-400"
               }`}
             >
               <span className="relative flex h-2 w-2 shrink-0">
@@ -181,7 +180,7 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
               {isLive ? "Event Live" : "Goal Reached"}
             </span>
           </div>
-          <p className="mt-1 truncate text-[15px] font-semibold text-slate-900">
+          <p className="mt-1 truncate text-[15px] font-semibold text-[#FBFBFC]">
             {event.name}
           </p>
         </div>
@@ -195,7 +194,7 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
           <ReceiptRow
             label="Est. Payout"
             value={`${formatUSDC(investment.estimatedPayout)} USDC`}
-            valueClass="font-bold text-dominant"
+            valueClass="font-bold text-accent-blue"
           />
           <ReceiptRow
             label="Status"
@@ -207,9 +206,9 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
 
         {/* Aviso de estado */}
         <div className="px-6 pb-5">
-          <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 px-4 py-3">
-            <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-            <p className="text-xs font-medium leading-relaxed text-slate-500">
+          <div className="flex items-start gap-2.5 rounded-xl bg-[#252028] px-4 py-3">
+            <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#5A6068]" />
+            <p className="text-xs font-medium leading-relaxed text-[#8B9298]">
               {isLive
                 ? "Event is live. Revenue is being collected. Distribution will follow."
                 : "Fully funded. Awaiting event execution and revenue collection."}
@@ -227,17 +226,17 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
     const total = quantity * event.pricePerToken;
 
     return (
-      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] shadow-sm">
         {/* Cabecera */}
         <div className="px-6 pb-4 pt-6">
-          <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+          <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-[#5A6068]">
             Invest in this Event
           </span>
-          <p className="mt-1 truncate text-[15px] font-semibold text-slate-900">
+          <p className="mt-1 truncate text-[15px] font-semibold text-[#FBFBFC]">
             {event.name}
           </p>
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
-            <span className="font-semibold text-slate-700">{event.pricePerToken} USDC</span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#5A6068]">
+            <span className="font-semibold text-[#E8EDEE]">{event.pricePerToken} USDC</span>
             <span aria-hidden>·</span>
             <span>per token</span>
             <span aria-hidden>·</span>
@@ -249,26 +248,25 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
 
         {/* Selector de cantidad */}
         <div className="px-6 pb-4">
-          <label className="mb-3 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+          <label className="mb-3 block text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068]">
             Token Quantity
           </label>
 
-          {/* Controles +/- */}
           <div className="flex items-center justify-between">
             <motion.button
               whileTap={{ scale: 0.88 }}
               onClick={() => setQuantity(q => Math.max(1, q - 1))}
               disabled={quantity <= 1}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:opacity-30"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#2E2832] text-[#E8EDEE] transition-colors hover:border-[#444F55] hover:bg-[#252028] disabled:opacity-30"
             >
               <Minus className="h-4 w-4" strokeWidth={2.5} />
             </motion.button>
 
             <div className="flex flex-col items-center gap-0.5">
-              <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] w-16 text-center text-[2.75rem] font-bold leading-none tabular-nums text-slate-900">
+              <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] w-16 text-center text-[2.75rem] font-bold leading-none tabular-nums text-[#FBFBFC]">
                 {quantity}
               </span>
-              <span className="text-[10px] font-semibold text-slate-400">
+              <span className="text-[10px] font-semibold text-[#5A6068]">
                 {quantity === 1 ? "token" : "tokens"}
               </span>
             </div>
@@ -277,7 +275,7 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
               whileTap={{ scale: 0.88 }}
               onClick={() => setQuantity(q => Math.min(maxBuy, q + 1))}
               disabled={quantity >= maxBuy}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:opacity-30"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#2E2832] text-[#E8EDEE] transition-colors hover:border-[#444F55] hover:bg-[#252028] disabled:opacity-30"
             >
               <Plus className="h-4 w-4" strokeWidth={2.5} />
             </motion.button>
@@ -295,8 +293,8 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
                   onClick={() => setQuantity(tokens)}
                   className={`flex-1 rounded-full py-1.5 text-[11px] font-bold transition-all duration-150 ${
                     active
-                      ? "bg-dominant text-white shadow-sm"
-                      : "border border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      ? "bg-accent-blue text-white shadow-sm"
+                      : "border border-[#2E2832] text-[#8B9298] hover:border-[#444F55] hover:text-[#E8EDEE]"
                   }`}
                 >
                   {label}
@@ -308,10 +306,10 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
 
         <Perforation />
 
-        {/* Total con animación de desplazamiento */}
+        {/* Total */}
         <div className="px-6 pb-5">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068]">
               Total Cost
             </span>
             <div className="flex items-baseline gap-1.5 overflow-hidden">
@@ -322,26 +320,25 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[1.75rem] font-bold leading-none tabular-nums text-slate-900"
+                  className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[1.75rem] font-bold leading-none tabular-nums text-[#FBFBFC]"
                 >
                   {formatUSDC(total)}
                 </motion.span>
               </AnimatePresence>
-              <span className="pb-0.5 text-sm font-semibold text-slate-400">USDC</span>
+              <span className="pb-0.5 text-sm font-semibold text-[#5A6068]">USDC</span>
             </div>
           </div>
         </div>
 
-        {/* Botón Buy — gradiente + shimmer + estado de firma */}
+        {/* Botón Buy */}
         <div className="px-6 pb-6">
           <motion.button
             onClick={handleBuy}
             disabled={signing}
             whileHover={signing ? {} : { scale: 1.015 }}
             whileTap={signing ? {} : { scale: 0.975 }}
-            className="relative w-full overflow-hidden rounded-full bg-dominant py-[14px] text-sm font-bold text-white shadow-lg shadow-dominant/20 transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
+            className="relative w-full overflow-hidden rounded-full bg-accent-blue py-[14px] text-sm font-bold text-white shadow-lg shadow-accent-blue/20 transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {/* Sweep de brillo — solo cuando idle */}
             {!signing && (
               <motion.div
                 aria-hidden="true"
@@ -356,7 +353,6 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
               />
             )}
 
-            {/* Contenido del botón */}
             <span className="relative flex items-center justify-center gap-2">
               <AnimatePresence mode="wait" initial={false}>
                 {signing ? (
@@ -392,7 +388,7 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
             </span>
           </motion.button>
 
-          <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-400">
+          <p className="mt-3 text-center text-[11px] leading-relaxed text-[#5A6068]">
             Revenue share only. Not equity or ownership.
           </p>
         </div>
@@ -402,12 +398,12 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
 
   // ── ESTADO 4: default — Evento no disponible para inversión ───────────────
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-      <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
+    <div className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] p-6 shadow-sm">
+      <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[10px] font-bold uppercase tracking-[0.15em] text-[#5A6068]">
         Investment
       </span>
       <Perforation />
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-[#8B9298]">
         This event is not currently open for investment.
       </p>
     </div>

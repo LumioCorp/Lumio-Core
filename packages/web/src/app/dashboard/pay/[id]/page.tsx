@@ -17,10 +17,10 @@ function PayContent({ id }: { id: string }) {
 
   if (!event) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#18121A]">
         <div className="text-center">
-          <p className="text-slate-500">Event not found.</p>
-          <Link href="/" className="mt-2 block text-sm text-dominant hover:underline">
+          <p className="text-[#8B9298]">Event not found.</p>
+          <Link href="/" className="mt-2 block text-sm text-accent-blue hover:underline">
             Go home
           </Link>
         </div>
@@ -43,7 +43,7 @@ function PayContent({ id }: { id: string }) {
       className="flex min-h-screen flex-col items-center justify-center px-4 py-12"
       style={{
         background:
-          "radial-gradient(ellipse 100% 60% at 50% -5%, rgba(219,234,254,0.35) 0%, white 65%)",
+          "radial-gradient(ellipse 100% 60% at 50% -5%, rgba(59,130,246,0.10) 0%, #18121A 65%)",
       }}
     >
       <div className="w-full max-w-sm">
@@ -59,17 +59,17 @@ function PayContent({ id }: { id: string }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_8px_32px_-8px_rgba(1,2,33,0.10)]"
+          className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.40)]"
         >
           {/* Header */}
-          <div className="border-b border-slate-50 px-6 pb-5 pt-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+          <div className="border-b border-[#252028] px-6 pb-5 pt-6">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#5A6068]">
               Ticket Purchase
             </p>
-            <h1 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mt-1 text-lg font-semibold tracking-[-0.02em] text-slate-900">
+            <h1 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mt-1 text-lg font-semibold tracking-[-0.02em] text-[#FBFBFC]">
               {event.name}
             </h1>
-            <p className="mt-0.5 text-[12px] text-slate-400">
+            <p className="mt-0.5 text-[12px] text-[#5A6068]">
               {formatDate(event.eventDate)} · {event.location}
             </p>
           </div>
@@ -78,17 +78,17 @@ function PayContent({ id }: { id: string }) {
           <div className="space-y-5 px-6 py-5">
             {/* Price per ticket */}
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#5A6068]">
                 Ticket Price
               </span>
-              <span className="font-semibold tabular-nums text-slate-800">
+              <span className="font-semibold tabular-nums text-[#FBFBFC]">
                 {event.ticketPrice} USDC
               </span>
             </div>
 
             {/* Quantity selector */}
             <div>
-              <label className="mb-3 block text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+              <label className="mb-3 block text-[11px] font-bold uppercase tracking-[0.08em] text-[#5A6068]">
                 Quantity
               </label>
               <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ function PayContent({ id }: { id: string }) {
                   whileTap={{ scale: 0.88 }}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:opacity-30"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#2E2832] text-[#E8EDEE] transition-colors hover:border-[#444F55] hover:bg-[#252028] disabled:opacity-30"
                 >
                   <Minus className="h-4 w-4" strokeWidth={2.5} />
                 </motion.button>
@@ -109,12 +109,12 @@ function PayContent({ id }: { id: string }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.18 }}
-                      className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.5rem] font-bold leading-none tabular-nums text-slate-900"
+                      className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.5rem] font-bold leading-none tabular-nums text-[#FBFBFC]"
                     >
                       {quantity}
                     </motion.span>
                   </AnimatePresence>
-                  <span className="mt-0.5 text-[10px] font-semibold text-slate-400">
+                  <span className="mt-0.5 text-[10px] font-semibold text-[#5A6068]">
                     {quantity === 1 ? "ticket" : "tickets"}
                   </span>
                 </div>
@@ -122,7 +122,7 @@ function PayContent({ id }: { id: string }) {
                 <motion.button
                   whileTap={{ scale: 0.88 }}
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#2E2832] text-[#E8EDEE] transition-colors hover:border-[#444F55] hover:bg-[#252028]"
                 >
                   <Plus className="h-4 w-4" strokeWidth={2.5} />
                 </motion.button>
@@ -130,8 +130,8 @@ function PayContent({ id }: { id: string }) {
             </div>
 
             {/* Total */}
-            <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-400">
+            <div className="flex items-center justify-between rounded-2xl bg-[#252028] px-4 py-3">
+              <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#5A6068]">
                 Total
               </span>
               <div className="flex items-baseline gap-1">
@@ -142,12 +142,12 @@ function PayContent({ id }: { id: string }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 6 }}
                     transition={{ duration: 0.18 }}
-                    className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-xl font-bold tabular-nums text-slate-900"
+                    className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-xl font-bold tabular-nums text-[#FBFBFC]"
                   >
                     {formatUSDC(total)}
                   </motion.span>
                 </AnimatePresence>
-                <span className="text-sm font-semibold text-slate-400">USDC</span>
+                <span className="text-sm font-semibold text-[#5A6068]">USDC</span>
               </div>
             </div>
           </div>
@@ -204,13 +204,13 @@ function PayContent({ id }: { id: string }) {
               </span>
             </motion.button>
 
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-slate-400">
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-[#5A6068]">
               Payment processed on Stellar network
             </p>
           </div>
         </motion.div>
 
-        <p className="mt-6 text-center text-[11px] text-slate-300">Powered by Lumio</p>
+        <p className="mt-6 text-center text-[11px] text-[#444F55]">Powered by Lumio</p>
       </div>
     </div>
   );
