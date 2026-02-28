@@ -115,14 +115,14 @@ function KpiCard({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm"
     >
       {/* Etiqueta + badge de tendencia */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#5A6068]">
           {label}
         </span>
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-[#252028] px-2 py-0.5 text-[10px] font-medium text-[#8B9298]">
           <ArrowUpRight className="h-2.5 w-2.5" />
           {trendLabel}
         </span>
@@ -130,11 +130,11 @@ function KpiCard({
 
       {/* Valor principal */}
       <div className="flex items-baseline gap-1.5 mb-4">
-        <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2rem] font-bold leading-none tracking-tight text-slate-900 tabular-nums">
+        <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2rem] font-bold leading-none tracking-tight text-[#FBFBFC] tabular-nums">
           {display}
         </span>
         {unit && (
-          <span className="text-sm font-semibold text-slate-400 leading-none pb-0.5">
+          <span className="text-sm font-semibold text-[#5A6068] leading-none pb-0.5">
             {unit}
           </span>
         )}
@@ -154,10 +154,10 @@ function KpiCard({
 function Metric({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-0.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068] mb-0.5">
         {label}
       </p>
-      <p className={`text-sm ${bold ? "font-bold text-slate-900" : "font-semibold text-slate-600"}`}>
+      <p className={`text-sm ${bold ? "font-bold text-[#FBFBFC]" : "font-semibold text-[#8B9298]"}`}>
         {value}
       </p>
     </div>
@@ -177,12 +177,12 @@ const OPERATIONAL_LABELS: Record<EventStatus, string> = {
 };
 
 const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; pulse?: string }> = {
-  funding_open:          { bg: "bg-blue-50",    text: "text-blue-600",    pulse: "bg-blue-400"   },
-  funding_successful:    { bg: "bg-violet-50",  text: "text-violet-600",  pulse: "bg-violet-400" },
-  event_executed:        { bg: "bg-amber-50",   text: "text-amber-600",   pulse: "bg-amber-400"  },
-  liquidation_countdown: { bg: "bg-orange-50",  text: "text-orange-600",  pulse: "bg-orange-400" },
-  distribution_executed: { bg: "bg-emerald-50", text: "text-emerald-600"                         },
-  cancelled:             { bg: "bg-red-50",     text: "text-red-500"                             },
+  funding_open:          { bg: "bg-blue-500/15",    text: "text-blue-400",    pulse: "bg-blue-400"   },
+  funding_successful:    { bg: "bg-violet-500/15",  text: "text-violet-400",  pulse: "bg-violet-400" },
+  event_executed:        { bg: "bg-amber-500/15",   text: "text-amber-400",   pulse: "bg-amber-400"  },
+  liquidation_countdown: { bg: "bg-orange-500/15",  text: "text-orange-400",  pulse: "bg-orange-400" },
+  distribution_executed: { bg: "bg-emerald-500/15", text: "text-emerald-400"                         },
+  cancelled:             { bg: "bg-red-500/15",     text: "text-red-400"                             },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -208,15 +208,15 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
     >
       <Link
         href={`/dashboard/organizer/event/${event.id}`}
-        className="group flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-200 hover:shadow-md"
+        className="group flex h-full flex-col rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm transition-all duration-200 hover:border-[#444F55] hover:shadow-md"
       >
         {/* ── Cabecera ── */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="min-w-0 flex-1">
-            <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[15px] font-semibold text-slate-900 transition-colors group-hover:text-dominant truncate">
+            <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[15px] font-semibold text-[#FBFBFC] transition-colors group-hover:text-dominant truncate">
               {event.name}
             </h3>
-            <p className="mt-0.5 text-[11px] text-slate-400 truncate">
+            <p className="mt-0.5 text-[11px] text-[#5A6068] truncate">
               {event.location} · {formatDate(event.eventDate)}
             </p>
           </div>
@@ -231,7 +231,7 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
                 <span className={`relative inline-flex h-2 w-2 rounded-full ${style.pulse}`} />
               </span>
             ) : (
-              <span className={`h-2 w-2 rounded-full ${isCompleted ? "bg-emerald-400" : "bg-slate-300"}`} />
+              <span className={`h-2 w-2 rounded-full ${isCompleted ? "bg-emerald-400" : "bg-[#444F55]"}`} />
             )}
             {label}
           </span>
@@ -241,11 +241,11 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
         {isFunding && (
           <div className="mb-4 space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium text-slate-400">Funding progress</span>
-              <span className="text-[11px] font-bold text-slate-600 tabular-nums">{fundedPct}%</span>
+              <span className="text-[11px] font-medium text-[#5A6068]">Funding progress</span>
+              <span className="text-[11px] font-bold text-[#8B9298] tabular-nums">{fundedPct}%</span>
             </div>
             <Progress value={fundedPct} />
-            <p className="text-[11px] text-slate-400 tabular-nums">
+            <p className="text-[11px] text-[#5A6068] tabular-nums">
               ${formatUSDC(event.totalFunded)} of ${formatUSDC(event.fundingTarget)} USDC raised
             </p>
           </div>
@@ -253,13 +253,13 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
 
         {/* ── Fondeo completado, listo para ejecutar ── */}
         {isFunded && (
-          <div className="mb-4 flex items-center gap-3 rounded-xl bg-violet-50 px-4 py-3">
-            <Zap className="h-4 w-4 shrink-0 text-violet-500" strokeWidth={2.2} />
+          <div className="mb-4 flex items-center gap-3 rounded-xl bg-violet-500/15 px-4 py-3">
+            <Zap className="h-4 w-4 shrink-0 text-violet-400" strokeWidth={2.2} />
             <div>
-              <p className="text-xs font-bold text-violet-700">
+              <p className="text-xs font-bold text-violet-400">
                 Fully funded — ready to go live
               </p>
-              <p className="mt-0.5 text-[11px] text-violet-500">
+              <p className="mt-0.5 text-[11px] text-violet-400">
                 ${formatUSDC(event.totalFunded)} raised · {event.investorCount} investors on board
               </p>
             </div>
@@ -268,21 +268,21 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
 
         {/* ── Revenue — para event_executed y distribution_executed ── */}
         {(isLive || isCompleted) && (
-          <div className="mb-4 rounded-xl bg-slate-50 px-4 py-3">
+          <div className="mb-4 rounded-xl bg-[#252028] px-4 py-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068]">
                 {isCompleted ? "Total Revenue" : "Revenue Collected"}
               </span>
               <span
                 className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-bold tabular-nums ${
-                  isCompleted ? "text-emerald-600" : "text-amber-600"
+                  isCompleted ? "text-emerald-400" : "text-amber-400"
                 }`}
               >
                 ${formatUSDC(event.totalRevenue)} USDC
               </span>
             </div>
             {isCompleted && event.distribution && (
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-[11px] text-[#5A6068]">
                 You received ${formatUSDC(event.distribution.organizerReceived)} · {event.investorCount} investors paid out
               </p>
             )}
@@ -290,7 +290,7 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
         )}
 
         {/* ── Métricas clave ── */}
-        <div className="grid grid-cols-3 gap-4 border-t border-slate-50 pt-4 mt-auto">
+        <div className="grid grid-cols-3 gap-4 border-t border-[#252028] pt-4 mt-auto">
           <Metric label="Investors"   value={`${event.investorCount}`} />
           <Metric label="Tokens Sold" value={`${event.tokensSold}`} bold />
           <Metric
@@ -303,7 +303,7 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
         </div>
 
         {/* ── Hover indicator ── */}
-        <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-medium text-slate-300 transition-colors group-hover:text-dominant">
+        <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-medium text-[#444F55] transition-colors group-hover:text-dominant">
           <span>Manage event</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
@@ -405,25 +405,25 @@ export default function OrganizerOverview() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
           {/* Funds Raised chart — ocupa 2 columnas en lg */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-2">
+          <div className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm lg:col-span-2">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
+                <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-[#FBFBFC]">
                   Funds Raised
                 </h2>
-                <p className="mt-0.5 text-[11px] text-slate-400">USDC raised across all events</p>
+                <p className="mt-0.5 text-[11px] text-[#5A6068]">USDC raised across all events</p>
               </div>
 
               {/* Time range tabs */}
-              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
+              <div className="flex items-center gap-1 rounded-xl bg-[#252028] p-1">
                 {(["7d", "30d", "90d"] as TimeRange[]).map((r) => (
                   <button
                     key={r}
                     onClick={() => setRange(r)}
                     className={`rounded-lg px-3 py-1 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-150 ${
                       range === r
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-400 hover:text-slate-700"
+                        ? "bg-[#1E1820] text-[#FBFBFC] shadow-sm"
+                        : "text-[#5A6068] hover:text-[#E8EDEE]"
                     }`}
                   >
                     {r}
@@ -440,12 +440,12 @@ export default function OrganizerOverview() {
           </div>
 
           {/* Donut chart — Events by Status */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm">
             <div className="mb-4">
-              <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
+              <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-[#FBFBFC]">
                 Events by Status
               </h2>
-              <p className="mt-0.5 text-[11px] text-slate-400">USDC by lifecycle stage</p>
+              <p className="mt-0.5 text-[11px] text-[#5A6068]">USDC by lifecycle stage</p>
             </div>
             <ChartPieDonut data={EVENTS_DONUT} />
           </div>
@@ -456,10 +456,10 @@ export default function OrganizerOverview() {
       <section>
         <div className="mb-4 flex items-center justify-between gap-4">
           <div>
-            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-semibold text-slate-900">
+            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-semibold text-[#FBFBFC]">
               My Events
             </h2>
-            <p className="mt-0.5 text-sm text-slate-400">
+            <p className="mt-0.5 text-sm text-[#5A6068]">
               {orgEvents.length} event{orgEvents.length !== 1 ? "s" : ""} · {organizerStats.activeEvents} active
             </p>
           </div>
@@ -486,23 +486,23 @@ export default function OrganizerOverview() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
+        className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-6 shadow-sm"
       >
-        <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-5 text-base font-semibold text-slate-900">
+        <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-5 text-base font-semibold text-[#FBFBFC]">
           Recent Activity
         </h2>
 
         <div className="relative">
-          <div className="absolute left-[6px] top-2 bottom-3 w-px bg-slate-100" />
+          <div className="absolute left-[6px] top-2 bottom-3 w-px bg-[#2E2832]" />
           <div className="space-y-5">
             {ACTIVITY.map((item, i) => (
               <div key={i} className="relative flex items-start gap-4 pl-5">
-                <div className="absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full border-2 border-white bg-slate-300 shadow-sm" />
+                <div className="absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full border-2 border-[#1E1820] bg-[#444F55] shadow-sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 leading-snug">{item.text}</p>
+                  <p className="text-sm font-medium text-[#E8EDEE] leading-snug">{item.text}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] text-slate-400">{item.date}</span>
-                    <span className="text-[11px] font-medium tabular-nums text-slate-500">
+                    <span className="text-[11px] text-[#5A6068]">{item.date}</span>
+                    <span className="text-[11px] font-medium tabular-nums text-[#8B9298]">
                       +${formatUSDC(item.amount)} USDC
                     </span>
                   </div>

@@ -10,7 +10,7 @@ export function Progress({
   return (
     <div
       className={cn(
-        "h-2 w-full overflow-hidden rounded-full bg-slate-100",
+        "h-2 w-full overflow-hidden rounded-full bg-[#252028]",
         className
       )}
     >

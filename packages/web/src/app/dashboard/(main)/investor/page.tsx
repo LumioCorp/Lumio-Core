@@ -61,9 +61,9 @@ const PORTFOLIO_CHART_DATA: Record<"7d" | "30d" | "90d", { date: string; value: 
 // Distribución del portfolio por estado para el donut
 const PORTFOLIO_DONUT = [
   { name: "Funding Open",     value: 1_100, fill: "#3b82f6" },
-  { name: "Funded",           value: 600,   fill: "#8b5cf6" },
-  { name: "Event Executed",   value: 300,   fill: "#f59e0b" },
-  { name: "Distributions",    value: 400,   fill: "#10b981" },
+  { name: "Upcoming Events",  value: 600,   fill: "#8b5cf6" },
+  { name: "Live / Completed", value: 300,   fill: "#f59e0b" },
+  { name: "Revenue Received", value: 400,   fill: "#10b981" },
 ];
 
 type TimeRange = "7d" | "30d" | "90d";
@@ -117,14 +117,14 @@ function KpiCard({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm"
     >
       {/* Etiqueta + badge de tendencia */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#5A6068]">
           {label}
         </span>
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-[#252028] px-2 py-0.5 text-[10px] font-medium text-[#8B9298]">
           <ArrowUpRight className="h-2.5 w-2.5" />
           {trendLabel}
         </span>
@@ -132,11 +132,11 @@ function KpiCard({
 
       {/* Valor principal */}
       <div className="flex items-baseline gap-1.5 mb-4">
-        <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2rem] font-bold leading-none tracking-tight text-slate-900 tabular-nums">
+        <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2rem] font-bold leading-none tracking-tight text-[#FBFBFC] tabular-nums">
           {display}
         </span>
         {unit && (
-          <span className="text-sm font-semibold text-slate-400 leading-none pb-0.5">
+          <span className="text-sm font-semibold text-[#5A6068] leading-none pb-0.5">
             {unit}
           </span>
         )}
@@ -156,10 +156,10 @@ function KpiCard({
 function Metric({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-0.5">
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068] mb-0.5">
         {label}
       </p>
-      <p className={`text-sm ${bold ? "font-bold text-slate-900" : "font-semibold text-slate-600"}`}>
+      <p className={`text-sm ${bold ? "font-bold text-[#FBFBFC]" : "font-semibold text-[#8B9298]"}`}>
         {value}
       </p>
     </div>
@@ -182,11 +182,11 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
   const roiPositive = roi >= 0;
 
   const roiBg    = roiPositive
-    ? (isCompleted ? "bg-emerald-50" : "bg-blue-50/70")
-    : (isCompleted ? "bg-red-50"    : "bg-slate-50");
+    ? (isCompleted ? "bg-emerald-500/15" : "bg-blue-500/15")
+    : (isCompleted ? "bg-red-500/15"    : "bg-[#252028]");
   const roiColor = roiPositive
-    ? (isCompleted ? "text-emerald-600" : "text-blue-600")
-    : (isCompleted ? "text-red-500"     : "text-slate-500");
+    ? (isCompleted ? "text-emerald-400" : "text-blue-400")
+    : (isCompleted ? "text-red-400"     : "text-[#8B9298]");
 
   return (
     <motion.div
@@ -197,17 +197,17 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
     >
       <Link
         href={`/dashboard/investor/event/${inv.eventId}`}
-        className="group flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:border-slate-200 hover:shadow-md"
+        className="group flex h-full flex-col rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm transition-all duration-200 hover:border-[#444F55] hover:shadow-md"
       >
         {/* ── Cabecera ── */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="min-w-0 flex-1">
-            <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[15px] font-semibold text-slate-900 transition-colors group-hover:text-dominant truncate">
+            <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[15px] font-semibold text-[#FBFBFC] transition-colors group-hover:text-dominant truncate">
               {inv.eventName}
             </h3>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <StatusBadge status={inv.status} />
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-[#5A6068]">
                 {formatDate(inv.purchaseDate)}
               </span>
             </div>
@@ -218,7 +218,7 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
             <p className={`font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-xl font-bold leading-none tabular-nums ${roiColor}`}>
               {roiPositive ? "+" : ""}{roi.toFixed(1)}%
             </p>
-            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-[#5A6068]">
               {isCompleted ? "ROI" : "Est. ROI"}
             </p>
           </div>
@@ -227,23 +227,23 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
         {/* ── Progress bar de fondeo ── */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-400">
+            <span className="text-[11px] font-medium text-[#5A6068]">
               {inv.status === "funding_open" ? "Event funding" : "Funding complete"}
             </span>
-            <span className="text-[11px] font-bold text-slate-600 tabular-nums">
+            <span className="text-[11px] font-bold text-[#8B9298] tabular-nums">
               {fundedPct}%
             </span>
           </div>
           <Progress value={fundedPct} />
           {event && inv.status === "funding_open" && (
-            <p className="text-[11px] text-slate-400 tabular-nums">
+            <p className="text-[11px] text-[#5A6068] tabular-nums">
               ${formatUSDC(event.totalFunded)} of ${formatUSDC(event.fundingTarget)} USDC raised
             </p>
           )}
         </div>
 
         {/* ── Métricas clave ── */}
-        <div className="grid grid-cols-3 gap-4 border-t border-slate-50 pt-4 mt-auto">
+        <div className="grid grid-cols-3 gap-4 border-t border-[#252028] pt-4 mt-auto">
           <Metric label="Tokens" value={`${inv.tokensOwned}`} />
           <Metric label="Invested" value={`$${formatUSDC(inv.totalInvested)}`} bold />
           <Metric
@@ -253,7 +253,7 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
         </div>
 
         {/* ── Flecha hover ── */}
-        <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-medium text-slate-300 transition-colors group-hover:text-dominant">
+        <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-medium text-[#444F55] transition-colors group-hover:text-dominant">
           <span>View details</span>
           <ChevronRight className="h-3.5 w-3.5" />
         </div>
@@ -295,7 +295,7 @@ export default function InvestorOverview() {
         />
         <KpiCard
           uid="active"
-          label="Active Positions"
+          label="Backed Events"
           target={investorStats.activeInvestments}
           isInt
           sparkData={SPARKLINES.activeInvestments}
@@ -317,7 +317,7 @@ export default function InvestorOverview() {
         />
         <KpiCard
           uid="pending"
-          label="Pending Returns"
+          label="Expected Revenue"
           target={investorStats.pendingReturns}
           unit="USDC"
           sparkData={SPARKLINES.pendingReturns}
@@ -328,70 +328,14 @@ export default function InvestorOverview() {
         />
       </div>
 
-      {/* ── Portfolio Overview ── */}
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-
-          {/* Portfolio Growth chart — ocupa 2 columnas en lg */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-2">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
-                  Portfolio Growth
-                </h2>
-                <p className="mt-0.5 text-[11px] text-slate-400">USDC value over time</p>
-              </div>
-
-              {/* Time range tabs */}
-              <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
-                {(["7d", "30d", "90d"] as TimeRange[]).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => setRange(r)}
-                    className={`rounded-lg px-3 py-1 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-150 ${
-                      range === r
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-400 hover:text-slate-700"
-                    }`}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <ChartAreaInteractive
-              data={PORTFOLIO_CHART_DATA[range]}
-              color="#3b82f6"
-              uid={`portfolio-${range}`}
-            />
-          </div>
-
-          {/* Donut chart — By Status */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="mb-4">
-              <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-slate-900">
-                By Status
-              </h2>
-              <p className="mt-0.5 text-[11px] text-slate-400">USDC allocation</p>
-            </div>
-            <ChartPieDonut data={PORTFOLIO_DONUT} />
-          </div>
-        </div>
-      </motion.section>
-
       {/* ── My Investments ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-semibold text-slate-900">
+            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-lg font-semibold text-[#FBFBFC]">
               My Investments
             </h2>
-            <p className="mt-0.5 text-sm text-slate-400">
+            <p className="mt-0.5 text-sm text-[#5A6068]">
               {myInvestments.length} positions · {myInvestments.filter(i => i.status !== "distribution_executed").length} active
             </p>
           </div>
@@ -411,28 +355,84 @@ export default function InvestorOverview() {
         </div>
       </section>
 
+      {/* ── Portfolio Overview ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+          {/* Investment Growth chart — ocupa 2 columnas en lg */}
+          <div className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm lg:col-span-2">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-[#FBFBFC]">
+                  Investment Growth
+                </h2>
+                <p className="mt-0.5 text-[11px] text-[#5A6068]">Total value of your event investments</p>
+              </div>
+
+              {/* Time range tabs */}
+              <div className="flex items-center gap-1 rounded-xl bg-[#252028] p-1">
+                {(["7d", "30d", "90d"] as TimeRange[]).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRange(r)}
+                    className={`rounded-lg px-3 py-1 text-[11px] font-bold uppercase tracking-[0.06em] transition-all duration-150 ${
+                      range === r
+                        ? "bg-[#1E1820] text-[#FBFBFC] shadow-sm"
+                        : "text-[#5A6068] hover:text-[#E8EDEE]"
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <ChartAreaInteractive
+              data={PORTFOLIO_CHART_DATA[range]}
+              color="#3b82f6"
+              uid={`portfolio-${range}`}
+            />
+          </div>
+
+          {/* Donut chart — Events by Stage */}
+          <div className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-5 shadow-sm">
+            <div className="mb-4">
+              <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-base font-semibold text-[#FBFBFC]">
+                Events by Stage
+              </h2>
+              <p className="mt-0.5 text-[11px] text-[#5A6068]">Where your USDC is allocated</p>
+            </div>
+            <ChartPieDonut data={PORTFOLIO_DONUT} />
+          </div>
+        </div>
+      </motion.section>
+
       {/* ── Recent Activity ── */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
+        className="rounded-2xl border border-[#2E2832] bg-[#1E1820] p-6 shadow-sm"
       >
-        <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-5 text-base font-semibold text-slate-900">
+        <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-5 text-base font-semibold text-[#FBFBFC]">
           Recent Activity
         </h2>
 
         <div className="relative">
-          <div className="absolute left-[6px] top-2 bottom-3 w-px bg-slate-100" />
+          <div className="absolute left-[6px] top-2 bottom-3 w-px bg-[#252028]" />
           <div className="space-y-5">
             {ACTIVITY.map((item, i) => (
               <div key={i} className="relative flex items-start gap-4 pl-5">
-                <div className="absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full border-2 border-white bg-slate-300 shadow-sm" />
+                <div className="absolute left-0 top-[3px] h-[13px] w-[13px] rounded-full border-2 border-[#1E1820] bg-[#444F55] shadow-sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-700 leading-snug">{item.text}</p>
+                  <p className="text-sm font-medium text-[#E8EDEE] leading-snug">{item.text}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] text-slate-400">{item.date}</span>
-                    <span className="text-[11px] font-medium tabular-nums text-slate-500">
+                    <span className="text-[11px] text-[#5A6068]">{item.date}</span>
+                    <span className="text-[11px] font-medium tabular-nums text-[#8B9298]">
                       {item.type === "receive" ? "+" : "−"}${formatUSDC(item.amount)} USDC
                     </span>
                   </div>

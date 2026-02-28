@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #EBEFF2;
-  --bg-card: #FFFFFF;
-  --icon-default: #8B8C8C;
-  --color-dominant: #010221;
-  --color-dominant-hover: #0A0A3A;
-  --text-primary: #010221;
-  --text-secondary: #8B8C8C;
-  --text-tertiary: #B0B3B8;
+  --bg-primary: #18121A;
+  --bg-card: #1E1820;
+  --bg-elevated: #252028;
+  --icon-default: #5A6068;
+  --color-dominant: #3B82F6;
+  --color-dominant-hover: #2563EB;
+  --text-primary: #FBFBFC;
+  --text-secondary: #8B9298;
+  --text-tertiary: #5A6068;
   --success: #22C55E;
   --warning: #F59E0B;
   --danger: #EF4444;
-  --border: #E2E5E9;
+  --border: #2E2832;
   --accent-blue: #3B82F6;
   /* Chart palette */
   --chart-1: #3b82f6;
@@ -25,6 +26,7 @@
 @theme inline {
   --color-bg-primary: var(--bg-primary);
   --color-bg-card: var(--bg-card);
+  --color-bg-elevated: var(--bg-elevated);
   --color-icon-default: var(--icon-default);
   --color-dominant: var(--color-dominant);
   --color-dominant-hover: var(--color-dominant-hover);
@@ -40,9 +42,9 @@
   --font-sans: var(--font-dm-sans);
   --font-display: var(--font-space-grotesk);
 
-  --shadow-card: 0 1px 3px rgba(1, 2, 33, 0.06);
-  --shadow-elevated: 0 4px 16px rgba(1, 2, 33, 0.08);
-  --shadow-sidebar: 1px 0 0 0 #f1f3f6;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-sidebar: 1px 0 0 0 #2E2832;
 
   --radius-card: 12px;
   --radius-btn: 8px;
@@ -59,15 +61,15 @@ body {
   font-family: var(--font-dm-sans), sans-serif;
 }
 
-/* Fondo app: blanco puro con cuadrícula sutil */
+/* Fondo app: dark con cuadrícula sutil */
 @utility bg-app-grid {
-  background-color: #ffffff;
-  background-image: radial-gradient(circle at 1px 1px, #dde2e9 1px, transparent 0);
+  background-color: #18121A;
+  background-image: radial-gradient(circle at 1px 1px, #2E2832 1px, transparent 0);
   background-size: 28px 28px;
 }
 
 /* Gradiente superior muy suave (alternativa al grid) */
 @utility bg-app-gradient {
-  background-color: #ffffff;
-  background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(59,130,246,0.05) 0%, transparent 70%);
+  background-color: #18121A;
+  background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(59,130,246,0.08) 0%, transparent 70%);
 }

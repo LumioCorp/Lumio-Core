@@ -23,18 +23,14 @@ function getPageTitle(pathname: string): string {
   return "Dashboard";
 }
 
-/**
- * Genera un gradiente CSS consistente a partir de la dirección de la wallet.
- * Determinístico: la misma dirección siempre produce el mismo gradiente.
- */
 function getAvatarGradient(address: string): [string, string] {
   const palettes: [string, string][] = [
-    ["#6366f1", "#818cf8"], // indigo
-    ["#3b82f6", "#60a5fa"], // blue
-    ["#10b981", "#34d399"], // emerald
-    ["#f59e0b", "#fbbf24"], // amber
-    ["#8b5cf6", "#a78bfa"], // violet
-    ["#ec4899", "#f472b6"], // pink
+    ["#6366f1", "#818cf8"],
+    ["#3b82f6", "#60a5fa"],
+    ["#10b981", "#34d399"],
+    ["#f59e0b", "#fbbf24"],
+    ["#8b5cf6", "#a78bfa"],
+    ["#ec4899", "#f472b6"],
   ];
   const hash = address
     .split("")
@@ -54,7 +50,7 @@ function WalletBadge({ address, displayAddress, balance, onDisconnect }: WalletB
   const initials = address.slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex items-center gap-2.5 rounded-[12px] border border-slate-200 bg-white px-3 py-2 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex items-center gap-2.5 rounded-[12px] border border-[#2E2832] bg-[#1E1820] px-3 py-2 shadow-sm transition-shadow hover:shadow-md">
       {/* Avatar con gradiente + status dot */}
       <div className="relative shrink-0">
         <div
@@ -68,39 +64,34 @@ function WalletBadge({ address, displayAddress, balance, onDisconnect }: WalletB
             {initials}
           </span>
         </div>
-        {/* Pulso de estado conectado */}
         <span className="absolute -bottom-0.5 -right-0.5 flex h-[10px] w-[10px]">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
-          <span className="relative inline-flex h-[10px] w-[10px] rounded-full bg-emerald-500 border-[1.5px] border-white" />
+          <span className="relative inline-flex h-[10px] w-[10px] rounded-full bg-emerald-500 border-[1.5px] border-[#1E1820]" />
         </span>
       </div>
 
-      {/* Dirección en monospace */}
-      <span className="font-mono text-xs font-medium text-slate-700 tabular-nums">
+      <span className="font-mono text-xs font-medium text-[#E8EDEE] tabular-nums">
         {displayAddress}
       </span>
 
-      {/* Separador vertical */}
-      <span className="h-4 w-px bg-slate-200" />
+      <span className="h-4 w-px bg-[#2E2832]" />
 
-      {/* Balance USDC */}
       <div className="flex items-center gap-1">
         <span className="text-[10px] font-semibold text-amber-500">◆</span>
         <span
-          className="text-xs font-semibold text-slate-800 tabular-nums"
+          className="text-xs font-semibold text-[#FBFBFC] tabular-nums"
           style={{ fontFamily: "var(--font-display, var(--font-dm-sans))" }}
         >
           {formatUSDC(balance)}
         </span>
-        <span className="text-[10px] font-medium text-slate-400 leading-none">
+        <span className="text-[10px] font-medium text-[#5A6068] leading-none">
           USDC
         </span>
       </div>
 
-      {/* Disconnect */}
       <button
         onClick={onDisconnect}
-        className="ml-0.5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        className="ml-0.5 p-1 rounded-full text-[#5A6068] hover:text-[#FBFBFC] hover:bg-[#252028] transition-colors"
         title="Disconnect wallet"
       >
         <LogOut className="h-3.5 w-3.5" />
@@ -115,23 +106,20 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   const { isConnected, address, displayAddress, usdcBalance, connect, disconnect } = useWallet();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 px-6 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#2E2832] bg-[#18121A]/80 px-6 backdrop-blur-md">
       <div className="flex items-center gap-3">
-        {/* Botón hamburguesa — solo mobile */}
         <button
           onClick={onMenuClick}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-[#8B9298] transition-colors hover:bg-[#252028] hover:text-[#FBFBFC] lg:hidden"
           aria-label="Abrir menú"
         >
           <Menu className="h-5 w-5" strokeWidth={1.75} />
         </button>
 
-        {/* Logo en mobile (cuando sidebar está oculto) */}
         <LumioLogo size="sm" className="lg:hidden" />
 
-        {/* Título de la página */}
         <h1
-          className="hidden text-lg font-semibold text-slate-900 lg:block"
+          className="hidden text-lg font-semibold text-[#FBFBFC] lg:block"
           style={{ fontFamily: "var(--font-display, var(--font-dm-sans))" }}
         >
           {title}
@@ -148,7 +136,7 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
       ) : (
         <button
           onClick={connect}
-          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+          className="flex items-center gap-2 rounded-full border border-[#2E2832] bg-[#1E1820] px-4 py-2 text-sm font-medium text-[#E8EDEE] shadow-sm transition-all hover:border-[#444F55] hover:shadow-md"
         >
           Connect Wallet
         </button>

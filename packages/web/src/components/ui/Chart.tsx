@@ -51,17 +51,17 @@ export function ChartSparkline({ data, color, uid = "spark" }: SparklineProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Custom Tooltip — estilo card blanco para ChartAreaInteractive
+// Custom Tooltip — dark style
 // ─────────────────────────────────────────────────────────────────────────────
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: TooltipPayload[]; label?: string }) {
   if (!active || !payload?.length) return null;
   const value = payload[0]?.value ?? 0;
   return (
-    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-lg">
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-0.5">
+    <div className="rounded-xl border border-[#2E2832] bg-[#252028] px-3 py-2 shadow-lg">
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068] mb-0.5">
         {label}
       </p>
-      <p className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-sm font-bold text-slate-900 tabular-nums">
+      <p className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-sm font-bold text-[#FBFBFC] tabular-nums">
         ${value.toLocaleString("en-US", { minimumFractionDigits: 0 })}
       </p>
     </div>
@@ -96,18 +96,18 @@ export function ChartAreaInteractive({
         </defs>
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="#f1f5f9"
+          stroke="#2E2832"
           vertical={false}
         />
         <XAxis
           dataKey="date"
-          tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 500 }}
+          tick={{ fill: "#5A6068", fontSize: 11, fontWeight: 500 }}
           tickLine={false}
           axisLine={false}
           dy={4}
         />
         <YAxis
-          tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 500 }}
+          tick={{ fill: "#5A6068", fontSize: 11, fontWeight: 500 }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `$${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`}

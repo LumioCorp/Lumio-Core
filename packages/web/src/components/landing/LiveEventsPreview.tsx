@@ -10,7 +10,7 @@ export default function LiveEventsPreview() {
   const fundingOpen = events.filter((e) => e.status === "funding_open").slice(0, 3);
 
   return (
-    <section className="bg-slate-50/60 py-24 px-6">
+    <section className="bg-[#1E1820]/60 py-24 px-6">
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
@@ -22,16 +22,16 @@ export default function LiveEventsPreview() {
           className="mb-12 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end"
         >
           <div>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5A6068]">
               Currently Funding
             </p>
-            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-3xl font-semibold tracking-[-0.03em] text-dominant sm:text-4xl">
+            <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-3xl font-semibold tracking-[-0.03em] text-[#FBFBFC] sm:text-4xl">
               Live Events
             </h2>
           </div>
           <Link
             href="/dashboard/investor/explore"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-dominant transition-colors hover:text-blue-500"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-accent-blue transition-colors hover:text-blue-400"
           >
             View all events
             <ChevronRight className="h-4 w-4" />
@@ -50,21 +50,21 @@ export default function LiveEventsPreview() {
           ))}
         </div>
 
-        {/* CTA bottom — estilo Card.tsx, botones rounded-full */}
+        {/* CTA bottom */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-12 overflow-hidden rounded-3xl border border-slate-200/50 bg-white px-8 py-10 text-center shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+          className="mt-12 overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] px-8 py-10 text-center shadow-[0_4px_20px_rgba(0,0,0,0.2)]"
         >
-          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+          <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#5A6068]">
             Ready to start?
           </p>
-          <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-3 text-2xl font-semibold tracking-[-0.02em] text-dominant">
+          <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-3 text-2xl font-semibold tracking-[-0.02em] text-[#FBFBFC]">
             Fund your next event. Or invest in one.
           </h3>
-          <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed tracking-[-0.01em] text-slate-400">
+          <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed tracking-[-0.01em] text-[#8B9298]">
             Whether you&apos;re an investor looking for real yield or an organizer ready to
             unlock on-chain crowdfunding — Lumio is for you.
           </p>
@@ -84,10 +84,10 @@ export default function LiveEventsPreview() {
             </Link>
             <Link
               href="/dashboard/organizer/create"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold tracking-[-0.01em] text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+              className="inline-flex items-center gap-2 rounded-full border border-[#2E2832] bg-[#1E1820] px-6 py-3 text-sm font-semibold tracking-[-0.01em] text-[#E8EDEE] shadow-sm transition-all hover:border-[#444F55] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
             >
               Create an Event
-              <ArrowRight className="h-4 w-4 text-slate-400" strokeWidth={1.5} />
+              <ArrowRight className="h-4 w-4 text-[#5A6068]" strokeWidth={1.5} />
             </Link>
           </div>
         </motion.div>

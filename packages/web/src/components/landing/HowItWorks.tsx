@@ -26,7 +26,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-slate-50/50 py-24 px-6">
+    <section className="bg-[#1E1820]/50 py-24 px-6">
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
@@ -37,10 +37,10 @@ export default function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mb-12 text-center"
         >
-          <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.14em] text-slate-400">
+          <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.14em] text-[#5A6068]">
             Simple by Design
           </p>
-          <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-3xl font-semibold tracking-[-0.03em] text-dominant sm:text-4xl">
+          <h2 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-3xl font-semibold tracking-[-0.03em] text-[#FBFBFC] sm:text-4xl">
             How It Works
           </h2>
         </motion.div>
@@ -56,22 +56,21 @@ export default function HowItWorks() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="relative rounded-2xl border border-slate-200/50 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-200 hover:-translate-y-px hover:border-slate-200 hover:shadow-[0_6px_24px_rgba(0,0,0,0.05)]"
+                className="relative rounded-2xl border border-[#2E2832] bg-[#1E1820] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-200 hover:-translate-y-px hover:border-[#444F55] hover:shadow-[0_6px_24px_rgba(0,0,0,0.3)]"
               >
-                {/* Número de paso — fondo decorativo */}
-                <div className="absolute right-5 top-5 font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.5rem] font-semibold leading-none text-slate-100 select-none">
+                {/* Número de paso */}
+                <div className="absolute right-5 top-5 font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-[2.5rem] font-semibold leading-none text-[#252028] select-none">
                   {i + 1}
                 </div>
 
-                {/* Ícono */}
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50">
-                  <Icon className="h-5 w-5 text-slate-500" strokeWidth={1.2} />
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#252028]">
+                  <Icon className="h-5 w-5 text-[#8B9298]" strokeWidth={1.2} />
                 </div>
 
-                <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-2 text-[15px] font-semibold tracking-[-0.02em] text-slate-900">
+                <h3 className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] mb-2 text-[15px] font-semibold tracking-[-0.02em] text-[#FBFBFC]">
                   {step.title}
                 </h3>
-                <p className="text-sm leading-relaxed tracking-[-0.01em] text-slate-400">
+                <p className="text-sm leading-relaxed tracking-[-0.01em] text-[#8B9298]">
                   {step.description}
                 </p>
               </motion.div>

@@ -23,11 +23,11 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-lg">
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-0.5">
+    <div className="rounded-xl border border-[#2E2832] bg-[#252028] px-3 py-2 shadow-lg">
+      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068] mb-0.5">
         {item.name}
       </p>
-      <p className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-sm font-bold text-slate-900 tabular-nums">
+      <p className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-sm font-bold text-[#FBFBFC] tabular-nums">
         ${(item.value ?? 0).toLocaleString("en-US")}
       </p>
     </div>
@@ -66,10 +66,10 @@ export function ChartPieDonut({ data }: { data: DonutEntry[] }) {
 
         {/* Center label — total */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-xl font-bold text-slate-900 tabular-nums">
+          <span className="font-[family-name:var(--font-space-grotesk,var(--font-dm-sans))] text-xl font-bold text-[#FBFBFC] tabular-nums">
             ${total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total}
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#5A6068]">
             Total
           </span>
         </div>
@@ -84,11 +84,11 @@ export function ChartPieDonut({ data }: { data: DonutEntry[] }) {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ backgroundColor: entry.fill }}
               />
-              <span className="text-[11px] font-medium text-slate-600">
+              <span className="text-[11px] font-medium text-[#8B9298]">
                 {entry.name}
               </span>
             </div>
-            <span className="text-[11px] font-bold tabular-nums text-slate-700">
+            <span className="text-[11px] font-bold tabular-nums text-[#E8EDEE]">
               ${entry.value.toLocaleString("en-US")}
             </span>
           </div>
