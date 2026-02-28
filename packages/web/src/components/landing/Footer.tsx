@@ -1,13 +1,84 @@
+import Link from "next/link";
+import LumioLogo from "@/components/ui/LumioLogo";
+
+const NAV_LINKS = {
+  Platform: [
+    { label: "Explore Events",  href: "/dashboard/investor/explore" },
+    { label: "My Portfolio",    href: "/dashboard/investor/portfolio" },
+    { label: "Create Event",    href: "/dashboard/organizer/create" },
+    { label: "My Events",       href: "/dashboard/organizer/events" },
+  ],
+  Resources: [
+    { label: "How it works",    href: "#" },
+    { label: "Documentation",   href: "#" },
+    { label: "GitHub",          href: "#" },
+    { label: "Twitter",         href: "#" },
+  ],
+};
+
 export default function Footer() {
   return (
-    <footer className="border-t border-border bg-bg-card py-8 px-4">
-      <div className="max-w-5xl mx-auto flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-        <p className="text-sm text-text-secondary">Lumio &copy; 2026 &bull; Built on Stellar</p>
-        <div className="flex gap-6 text-sm text-text-secondary">
-          <a href="#" className="hover:text-text-primary transition-colors">Documentation</a>
-          <a href="#" className="hover:text-text-primary transition-colors">GitHub</a>
-          <a href="#" className="hover:text-text-primary transition-colors">Twitter</a>
+    <footer className="border-t border-slate-100 bg-white px-6 py-14">
+      <div className="mx-auto max-w-5xl">
+
+        {/* Top row: brand + links */}
+        <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
+
+          {/* Brand column */}
+          <div className="max-w-xs">
+            <LumioLogo size="sm" />
+            <p className="mt-4 text-sm leading-relaxed tracking-[-0.01em] text-slate-400">
+              Lumio tokenizes real-world events so anyone can invest and share the revenue.
+              Transparent, on-chain, and powered by Stellar.
+            </p>
+            {/* Stellar badge */}
+            <p className="mt-5 text-[10px] font-medium tracking-[0.04em] text-slate-300">
+              ⬡ Built on Stellar Network · USDC · Testnet
+            </p>
+          </div>
+
+          {/* Nav columns */}
+          <div className="flex gap-14">
+            {Object.entries(NAV_LINKS).map(([section, links]) => (
+              <div key={section}>
+                <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                  {section}
+                </p>
+                <ul className="space-y-2.5">
+                  {links.map(({ label, href }) => (
+                    <li key={label}>
+                      <Link
+                        href={href}
+                        className="text-sm font-medium tracking-[-0.01em] text-slate-500 transition-colors hover:text-slate-900"
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Divider */}
+        <div className="my-8 border-t border-slate-100" />
+
+        {/* Bottom row */}
+        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+          <p className="text-sm tracking-[-0.01em] text-slate-400">
+            Lumio &copy; 2026 &bull; Built on Stellar
+          </p>
+          <div className="flex items-center gap-1.5">
+            {["Trustless", "USDC", "Open Source"].map((tag, i) => (
+              <span key={tag} className="flex items-center gap-1.5">
+                {i > 0 && <span className="h-1 w-1 rounded-full bg-slate-200" />}
+                <span className="text-[11px] font-medium tracking-[0.02em] text-slate-400">{tag}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
       </div>
     </footer>
   );
