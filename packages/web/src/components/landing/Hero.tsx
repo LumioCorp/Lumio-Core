@@ -1,26 +1,43 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Wallet, ChevronDown } from "lucide-react";
 import LumioLogo from "@/components/ui/LumioLogo";
 import EventCard from "@/components/dashboard/EventCard";
 import { events } from "@/data/mock";
+import { useWallet } from "@/components/ui/WalletProvider";
 
-// ─── Botón "Connect Wallet" — estado desconectado ─────────────────────────────
+// ─── Botón "Connect Wallet" — navbar ─────────────────────────────────────────
 function ConnectWalletButton() {
+  const { isConnected, isLoading, displayAddress, connect } = useWallet();
+  const router = useRouter();
+
+  const handleClick = async () => {
+    if (isConnected) {
+      router.push("/dashboard/investor");
+      return;
+    }
+    const addr = await connect();
+    if (addr) {
+      router.push("/dashboard/investor");
+    }
+  };
+
   return (
-    <Link
-      href="/dashboard/investor"
-      className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-3.5 py-2 shadow-sm transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+    <button
+      onClick={handleClick}
+      disabled={isLoading}
+      className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-3.5 py-2 shadow-sm transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] disabled:opacity-60"
     >
       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100">
         <Wallet className="h-3.5 w-3.5 text-slate-400" strokeWidth={1.2} />
       </div>
       <span className="hidden text-sm font-medium tracking-[-0.01em] text-slate-700 sm:block">
-        Connect Wallet
+        {isLoading ? "Connecting..." : isConnected ? displayAddress : "Connect Wallet"}
       </span>
-    </Link>
+    </button>
   );
 }
 
@@ -29,6 +46,20 @@ export default function Hero() {
   const fundingOpen = events.filter((e) => e.status === "funding_open");
   const card1 = fundingOpen[0] ?? events[0];
   const card2 = fundingOpen[1] ?? events[1];
+
+  const { isConnected, isLoading, connect } = useWallet();
+  const router = useRouter();
+
+  const handleExplore = async () => {
+    if (isConnected) {
+      router.push("/dashboard/investor");
+      return;
+    }
+    const addr = await connect();
+    if (addr) {
+      router.push("/dashboard/investor");
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -115,9 +146,10 @@ export default function Hero() {
                 transition={{ duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
               >
-                <Link
-                  href="/dashboard/investor"
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-dominant to-blue-400 px-7 py-[13px] text-sm font-semibold tracking-[-0.01em] text-white shadow-md shadow-dominant/20 transition-opacity hover:opacity-90"
+                <button
+                  onClick={handleExplore}
+                  disabled={isLoading}
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-dominant to-blue-400 px-7 py-[13px] text-sm font-semibold tracking-[-0.01em] text-white shadow-md shadow-dominant/20 transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
                   <motion.div
                     aria-hidden="true"
@@ -125,9 +157,11 @@ export default function Hero() {
                     animate={{ x: ["-130%", "230%"] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 3 }}
                   />
-                  <span className="relative">Explore Events</span>
+                  <span className="relative">
+                    {isLoading ? "Connecting..." : isConnected ? "Go to Dashboard" : "Explore Events"}
+                  </span>
                   <ArrowRight className="relative h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={1.5} />
-                </Link>
+                </button>
 
                 <Link
                   href="/dashboard/organizer/create"

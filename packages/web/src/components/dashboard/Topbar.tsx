@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
-import { connectedWallet } from "@/data/mock";
+import { Menu, LogOut } from "lucide-react";
+import { useWallet } from "@/components/ui/WalletProvider";
 import { formatUSDC } from "@/lib/utils";
 import LumioLogo from "@/components/ui/LumioLogo";
 
@@ -44,10 +44,12 @@ function getAvatarGradient(address: string): [string, string] {
 
 interface WalletBadgeProps {
   address: string;
+  displayAddress: string;
   balance: number;
+  onDisconnect: () => void;
 }
 
-function WalletBadge({ address, balance }: WalletBadgeProps) {
+function WalletBadge({ address, displayAddress, balance, onDisconnect }: WalletBadgeProps) {
   const [from, to] = getAvatarGradient(address);
   const initials = address.slice(0, 2).toUpperCase();
 
@@ -75,7 +77,7 @@ function WalletBadge({ address, balance }: WalletBadgeProps) {
 
       {/* Dirección en monospace */}
       <span className="font-mono text-xs font-medium text-slate-700 tabular-nums">
-        {address}
+        {displayAddress}
       </span>
 
       {/* Separador vertical */}
@@ -94,6 +96,15 @@ function WalletBadge({ address, balance }: WalletBadgeProps) {
           USDC
         </span>
       </div>
+
+      {/* Disconnect */}
+      <button
+        onClick={onDisconnect}
+        className="ml-0.5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        title="Disconnect wallet"
+      >
+        <LogOut className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
@@ -101,6 +112,7 @@ function WalletBadge({ address, balance }: WalletBadgeProps) {
 export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
+  const { isConnected, address, displayAddress, usdcBalance, connect, disconnect } = useWallet();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 px-6 backdrop-blur-md">
@@ -126,11 +138,21 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
         </h1>
       </div>
 
-      {/* Wallet Badge */}
-      <WalletBadge
-        address={connectedWallet.displayAddress}
-        balance={connectedWallet.usdcBalance}
-      />
+      {isConnected && address ? (
+        <WalletBadge
+          address={address}
+          displayAddress={displayAddress}
+          balance={usdcBalance}
+          onDisconnect={disconnect}
+        />
+      ) : (
+        <button
+          onClick={connect}
+          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
+        >
+          Connect Wallet
+        </button>
+      )}
     </header>
   );
 }

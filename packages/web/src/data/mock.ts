@@ -1,11 +1,5 @@
 import type { LumioEvent, Investment, DistributionRecord, TicketPurchase } from "@/types";
 
-export const connectedWallet = {
-  address: "GDQP2K...X7YZ",
-  displayAddress: "GDQP...X7YZ",
-  usdcBalance: 4_250.00,
-};
-
 export const events: LumioEvent[] = [
   {
     id: "evt-001",
