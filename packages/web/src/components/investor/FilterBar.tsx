@@ -13,9 +13,9 @@ const CATEGORIES: { value: EventCategory | "all"; label: string }[] = [
 
 const STATUSES: { value: EventStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "funding_open", label: "Funding Open" },
-  { value: "funding_successful", label: "Funded" },
-  { value: "distribution_executed", label: "Completed" },
+  { value: "FUNDING_OPEN", label: "Funding Open" },
+  { value: "FUNDED", label: "Funded" },
+  { value: "COMPLETED", label: "Completed" },
 ];
 
 interface FilterBarProps {

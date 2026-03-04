@@ -5,12 +5,12 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import StatusBadge from "@/components/dashboard/StatusBadge";
-import { investorStats, myInvestments, events } from "@/data/mock";
+import { investorStats as mockInvestorStats, myInvestments as mockInvestments, events as mockEvents } from "@/data/mock";
 import { formatUSDC, formatDate } from "@/lib/utils";
 import { ChartSparkline, ChartAreaInteractive } from "@/components/ui/Chart";
 import { ChartPieDonut } from "@/components/ui/ChartDonut";
 import { Progress } from "@/components/ui/Progress";
-import type { EventStatus, Investment } from "@/types";
+import type { EventStatus, Investment, LumioEvent } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Datos de tendencia sintéticos — reemplazar por datos reales de la API
@@ -169,13 +169,13 @@ function Metric({ label, value, bold }: { label: string; value: string; bold?: b
 // ─────────────────────────────────────────────────────────────────────────────
 // Investment Card — con Progress bar y h-full
 // ─────────────────────────────────────────────────────────────────────────────
-function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
+function InvestmentCard({ inv, index, events }: { inv: Investment; index: number; events: LumioEvent[] }) {
   const event     = events.find((e) => e.id === inv.eventId);
   const fundedPct = event
     ? Math.round((event.totalFunded / event.fundingTarget) * 100)
     : 100;
 
-  const isCompleted = inv.status === "distribution_executed";
+  const isCompleted = inv.status === "COMPLETED";
   const roi         = inv.roi !== undefined
     ? inv.roi
     : ((inv.estimatedPayout - inv.totalInvested) / inv.totalInvested) * 100;
@@ -228,14 +228,14 @@ function InvestmentCard({ inv, index }: { inv: Investment; index: number }) {
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-medium text-[#5A6068]">
-              {inv.status === "funding_open" ? "Event funding" : "Funding complete"}
+              {inv.status === "FUNDING_OPEN" ? "Event funding" : "Funding complete"}
             </span>
             <span className="text-[11px] font-bold text-[#8B9298] tabular-nums">
               {fundedPct}%
             </span>
           </div>
           <Progress value={fundedPct} />
-          {event && inv.status === "funding_open" && (
+          {event && inv.status === "FUNDING_OPEN" && (
             <p className="text-[11px] text-[#5A6068] tabular-nums">
               ${formatUSDC(event.totalFunded)} of ${formatUSDC(event.fundingTarget)} USDC raised
             </p>
@@ -276,6 +276,9 @@ const ACTIVITY = [
 // ─────────────────────────────────────────────────────────────────────────────
 export default function InvestorOverview() {
   const [range, setRange] = useState<TimeRange>("30d");
+  const [investments, setInvestments] = useState<Investment[]>(mockInvestments);
+  const [allEvents, setAllEvents] = useState<LumioEvent[]>(mockEvents);
+  const [stats, setStats] = useState(mockInvestorStats);
 
   return (
     <div className="space-y-8 pb-4">
@@ -285,7 +288,7 @@ export default function InvestorOverview() {
         <KpiCard
           uid="invested"
           label="Total Invested"
-          target={investorStats.totalInvested}
+          target={stats.totalInvested}
           unit="USDC"
           sparkData={SPARKLINES.totalInvested}
           color="#3b82f6"
@@ -296,7 +299,7 @@ export default function InvestorOverview() {
         <KpiCard
           uid="active"
           label="Backed Events"
-          target={investorStats.activeInvestments}
+          target={stats.activeInvestments}
           isInt
           sparkData={SPARKLINES.activeInvestments}
           color="#8b5cf6"
@@ -307,7 +310,7 @@ export default function InvestorOverview() {
         <KpiCard
           uid="returns"
           label="Total Returns"
-          target={investorStats.totalReturns}
+          target={stats.totalReturns}
           unit="USDC"
           sparkData={SPARKLINES.totalReturns}
           color="#10b981"
@@ -318,7 +321,7 @@ export default function InvestorOverview() {
         <KpiCard
           uid="pending"
           label="Expected Revenue"
-          target={investorStats.pendingReturns}
+          target={stats.pendingReturns}
           unit="USDC"
           sparkData={SPARKLINES.pendingReturns}
           color="#f59e0b"
@@ -336,7 +339,7 @@ export default function InvestorOverview() {
               My Investments
             </h2>
             <p className="mt-0.5 text-sm text-[#5A6068]">
-              {myInvestments.length} positions · {myInvestments.filter(i => i.status !== "distribution_executed").length} active
+              {investments.length} positions · {investments.filter(i => i.status !== "COMPLETED").length} active
             </p>
           </div>
           <Link
@@ -349,8 +352,8 @@ export default function InvestorOverview() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {myInvestments.map((inv, i) => (
-            <InvestmentCard key={inv.eventId} inv={inv} index={i} />
+          {investments.map((inv, i) => (
+            <InvestmentCard key={inv.eventId} inv={inv} index={i} events={allEvents} />
           ))}
         </div>
       </section>

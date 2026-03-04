@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { WalletProvider } from "@/components/ui/WalletProvider";
+import { TrustlessWorkProvider } from "@/components/ui/TrustlessWorkProvider";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable} ${spaceGrotesk.variable} antialiased`}>
-        <WalletProvider>{children}</WalletProvider>
+        <WalletProvider>
+          <TrustlessWorkProvider>{children}</TrustlessWorkProvider>
+        </WalletProvider>
       </body>
     </html>
   );

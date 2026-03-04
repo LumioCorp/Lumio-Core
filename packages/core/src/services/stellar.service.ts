@@ -12,7 +12,7 @@ import {
   getNetworkPassphrase,
   getUSDCAsset,
 } from "../lib/stellar.js";
-import { stellarLogger } from "../lib/logger.js";
+import { logger } from "../lib/logger.js";
 import { prisma } from "../models/prisma.js";
 
 export class StellarError extends Error {
@@ -39,11 +39,11 @@ export interface SetupAssetResult {
 
 export class StellarService {
   /**
-   * Generates a new Stellar keypair for an event.
+   * Generates a new Stellar keypair for token issuance.
+   * This wallet is used ONLY for issuing custom tokens — it does NOT custody investor funds.
    * The secret key is encrypted before being returned.
-   * @returns Public key and encrypted secret key
    */
-  createEventWallet(): EventWallet {
+  createTokenIssuerWallet(): EventWallet {
     const keypair = Keypair.random();
 
     const publicKey = keypair.publicKey();
@@ -72,7 +72,7 @@ export class StellarService {
       );
     }
 
-    stellarLogger.info("Funding account with Friendbot", { publicKey });
+    logger.info("Funding account with Friendbot", { publicKey });
     const startTime = Date.now();
 
     const friendbotUrl = `https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`;
@@ -91,7 +91,7 @@ export class StellarService {
         );
       }
 
-      stellarLogger.info("Friendbot funding successful", {
+      logger.info("Friendbot funding successful", {
         publicKey,
         duration: Date.now() - startTime,
       });
@@ -99,7 +99,7 @@ export class StellarService {
       if (error instanceof StellarError) throw error;
 
       const message = error instanceof Error ? error.message : "Unknown error";
-      stellarLogger.error("Friendbot funding failed", {
+      logger.error("Friendbot funding failed", {
         publicKey,
         error: message,
         duration: Date.now() - startTime,
@@ -137,7 +137,7 @@ export class StellarService {
       throw new StellarError("Event asset code not set", "ASSET_NOT_SET");
     }
 
-    stellarLogger.txStart("SETUP_ASSET", eventId, {
+    logger.txStart("SETUP_ASSET", eventId, {
       assetCode: event.assetCode,
       publicKey: event.stellarPublicKey,
     });
@@ -163,7 +163,7 @@ export class StellarService {
         // Set authorization flags for compliance
         .addOperation(
           Operation.setOptions({
-            setFlags: AuthRevocableFlag | AuthClawbackEnabledFlag,
+            setFlags: (AuthRevocableFlag | AuthClawbackEnabledFlag) as number as typeof AuthRevocableFlag,
           })
         )
         // Add USDC trustline so account can receive USDC payments
@@ -182,7 +182,7 @@ export class StellarService {
       // Submit to network
       const result = await server.submitTransaction(transaction);
 
-      stellarLogger.txSuccess(
+      logger.txSuccess(
         "SETUP_ASSET",
         eventId,
         result.hash,
@@ -198,7 +198,7 @@ export class StellarService {
       const duration = Date.now() - startTime;
       const err = error instanceof Error ? error : new Error(String(error));
 
-      stellarLogger.txFailed("SETUP_ASSET", eventId, err, duration);
+      logger.txFailed("SETUP_ASSET", eventId, err, duration);
 
       throw new StellarError(
         `Failed to setup asset: ${err.message}`,
@@ -209,19 +209,18 @@ export class StellarService {
   }
 
   /**
-   * Builds an atomic swap transaction for token purchase.
-   * The investor sends USDC to the event, event sends tokens back.
-   * Returns unsigned XDR for frontend signing.
+   * Issues custom tokens to an investor after they have funded the TW escrow.
+   * The issuer wallet signs and submits a Payment operation.
    * @param eventId - Event ID
    * @param investorPublicKey - Investor's Stellar public key
-   * @param tokenAmount - Number of tokens to purchase
-   * @returns XDR string of the unsigned transaction
+   * @param tokenAmount - Number of tokens to issue
+   * @returns Transaction hash of the token issuance
    */
-  async buildPurchaseTransaction(
+  async issueTokensToInvestor(
     eventId: string,
     investorPublicKey: string,
     tokenAmount: number
-  ): Promise<{ xdr: string; usdcAmount: string }> {
+  ): Promise<{ txHash: string }> {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -231,14 +230,14 @@ export class StellarService {
     }
 
     if (!event.stellarPublicKey || !event.stellarSecretEncrypted) {
-      throw new StellarError("Event wallet not initialized", "WALLET_NOT_INITIALIZED");
+      throw new StellarError("Token issuer wallet not initialized", "WALLET_NOT_INITIALIZED");
     }
 
     if (!event.assetCode) {
       throw new StellarError("Event asset not configured", "ASSET_NOT_SET");
     }
 
-    stellarLogger.info("Building purchase transaction", {
+    logger.info("Issuing tokens to investor", {
       eventId,
       investorPublicKey,
       tokenAmount,
@@ -247,74 +246,57 @@ export class StellarService {
     try {
       const server = getHorizonServer();
       const networkPassphrase = getNetworkPassphrase();
-      const usdcAsset = getUSDCAsset();
 
-      // Calculate USDC cost
-      const tokenPrice = Number(event.tokenPrice);
-      const usdcAmount = (tokenAmount * tokenPrice).toFixed(7);
+      // Decrypt issuer secret
+      const secret = decryptSecret(event.stellarSecretEncrypted);
+      const issuerKeypair = Keypair.fromSecret(secret);
 
       // Event's custom asset
       const eventAsset = new Asset(event.assetCode, event.stellarPublicKey);
 
-      // Decrypt event secret for signing
-      const eventSecret = decryptSecret(event.stellarSecretEncrypted);
-      const eventKeypair = Keypair.fromSecret(eventSecret);
+      // Load issuer account
+      const issuerAccount = await server.loadAccount(event.stellarPublicKey);
 
-      // Load investor account (transaction source)
-      const investorAccount = await server.loadAccount(investorPublicKey);
-
-      // Build atomic swap transaction
-      // Source: Investor (pays fee and signs first)
-      const transaction = new TransactionBuilder(investorAccount, {
+      // Build token issuance transaction
+      const transaction = new TransactionBuilder(issuerAccount, {
         fee: "100000",
         networkPassphrase,
       })
-        // 1. Investor sends USDC to event
-        .addOperation(
-          Operation.payment({
-            destination: event.stellarPublicKey,
-            asset: usdcAsset,
-            amount: usdcAmount,
-            source: investorPublicKey,
-          })
-        )
-        // 2. Event sends tokens to investor
         .addOperation(
           Operation.payment({
             destination: investorPublicKey,
             asset: eventAsset,
             amount: tokenAmount.toFixed(7),
-            source: event.stellarPublicKey,
           })
         )
-        .setTimeout(300) // 5 minutes to sign
+        .setTimeout(30)
         .build();
 
-      // Event signs its operation
-      transaction.sign(eventKeypair);
+      // Sign with issuer keypair
+      transaction.sign(issuerKeypair);
 
-      stellarLogger.info("Purchase transaction built successfully", {
+      // Submit to network
+      const result = await server.submitTransaction(transaction);
+
+      logger.info("Tokens issued successfully", {
         eventId,
-        usdcAmount,
+        investorPublicKey,
         tokenAmount,
+        txHash: result.hash,
       });
 
-      // Return XDR for investor to sign
-      return {
-        xdr: transaction.toXDR(),
-        usdcAmount,
-      };
+      return { txHash: result.hash };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      stellarLogger.error("Failed to build purchase transaction", {
+      logger.error("Failed to issue tokens", {
         eventId,
         investorPublicKey,
         error: message,
       });
 
       throw new StellarError(
-        `Failed to build transaction: ${message}`,
-        "TX_BUILD_FAILED",
+        `Failed to issue tokens: ${message}`,
+        "TX_FAILED",
         true
       );
     }

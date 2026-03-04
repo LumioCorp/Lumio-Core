@@ -36,6 +36,14 @@ export const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  DRAFT: { label: "Draft", color: "text-slate-400", bg: "bg-slate-500/15" },
+  ESCROW_DEPLOYED: { label: "Escrow Ready", color: "text-cyan-400", bg: "bg-cyan-500/15" },
+  FUNDING_OPEN: { label: "Funding Open", color: "text-blue-400", bg: "bg-blue-500/15" },
+  FUNDED: { label: "Funded", color: "text-green-400", bg: "bg-green-500/15" },
+  LIVE: { label: "Live", color: "text-amber-400", bg: "bg-amber-500/15" },
+  COMPLETED: { label: "Completed", color: "text-green-400", bg: "bg-green-500/15" },
+  CANCELLED: { label: "Cancelled", color: "text-red-400", bg: "bg-red-500/15" },
+  // Legacy lowercase keys for backward compatibility with mock data
   funding_open: { label: "Funding Open", color: "text-blue-400", bg: "bg-blue-500/15" },
   funding_successful: { label: "Funded", color: "text-green-400", bg: "bg-green-500/15" },
   event_executed: { label: "Event Executed", color: "text-amber-400", bg: "bg-amber-500/15" },

@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { LumioEvent, Investment } from "@/types";
 import { formatUSDC } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { useWallet } from "@/components/ui/WalletProvider";
+import { useInvestViaEscrow } from "@/hooks/useEscrow";
 
 // ─── Opciones de selección rápida de porcentaje ───────────────────────────
 const PCT_OPTIONS = [
@@ -60,6 +62,8 @@ interface InvestmentPanelProps {
 
 export default function InvestmentPanel({ event, investment }: InvestmentPanelProps) {
   const { showToast } = useToast();
+  const { address, refreshBalance } = useWallet();
+  const { invest } = useInvestViaEscrow();
   const [quantity, setQuantity] = useState(1);
   const [signing, setSigning] = useState(false);
 
@@ -67,16 +71,31 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
   const remaining = event.tokenSupply - event.tokensSold;
   const maxBuy    = Math.min(maxTokens, remaining);
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
+    if (!address) {
+      showToast("Please connect your wallet first");
+      return;
+    }
+    if (!event.escrowContractId) {
+      showToast("Escrow not deployed for this event");
+      return;
+    }
+
     setSigning(true);
-    setTimeout(() => {
-      setSigning(false);
+    try {
+      const usdcAmount = quantity * event.pricePerToken;
+      await invest(event.id, event.escrowContractId, quantity, usdcAmount);
       showToast(`Successfully purchased ${quantity} token${quantity !== 1 ? "s" : ""}!`);
-    }, 1_300);
+      await refreshBalance();
+    } catch (err) {
+      showToast(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    } finally {
+      setSigning(false);
+    }
   };
 
-  // ── ESTADO 1: distribution_executed — Recibo de pago final ───────────────
-  if (event.status === "distribution_executed" && investment) {
+  // ── ESTADO 1: COMPLETED / distribution_executed — Recibo de pago final ──
+  if (event.status === "COMPLETED" && investment) {
     const roi         = investment.roi ?? 0;
     const roiPositive = roi >= 0;
 
@@ -142,12 +161,12 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
     );
   }
 
-  // ── ESTADO 2: funding_successful / event_executed — Posición activa ───────
+  // ── ESTADO 2: FUNDED / LIVE — Posición activa ──────────────────────────
   if (
-    (event.status === "funding_successful" || event.status === "event_executed") &&
+    (event.status === "FUNDED" || event.status === "LIVE") &&
     investment
   ) {
-    const isLive = event.status === "event_executed";
+    const isLive = event.status === "LIVE";
 
     return (
       <div className="overflow-hidden rounded-3xl border border-[#2E2832] bg-[#1E1820] shadow-sm">
@@ -221,8 +240,8 @@ export default function InvestmentPanel({ event, investment }: InvestmentPanelPr
     );
   }
 
-  // ── ESTADO 3: funding_open — Formulario de inversión ──────────────────────
-  if (event.status === "funding_open") {
+  // ── ESTADO 3: FUNDING_OPEN — Formulario de inversión ─────────────────────
+  if (event.status === "FUNDING_OPEN") {
     const total = quantity * event.pricePerToken;
 
     return (

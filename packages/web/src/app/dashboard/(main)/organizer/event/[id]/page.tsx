@@ -1,10 +1,12 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Users, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
-import { events } from "@/data/mock";
+import * as api from "@/lib/api";
+import { events as mockEvents } from "@/data/mock";
+import type { LumioEvent } from "@/types";
 import { formatUSDC, formatDate, fundingPercent } from "@/lib/utils";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import ProgressBar from "@/components/dashboard/ProgressBar";
@@ -12,9 +14,15 @@ import { useToast } from "@/components/ui/Toast";
 
 export default function OrganizerEventDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const event = events.find((e) => e.id === id);
+  const [event, setEvent] = useState<LumioEvent | null>(() => mockEvents.find((e) => e.id === id) ?? null);
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    api.getEventFull(id)
+      .then((data) => setEvent(data as unknown as LumioEvent))
+      .catch(() => { /* keep mock fallback */ });
+  }, [id]);
 
   if (!event) {
     return (
@@ -28,8 +36,8 @@ export default function OrganizerEventDetail({ params }: { params: Promise<{ id:
   }
 
   const pct = fundingPercent(event.totalFunded, event.fundingTarget);
-  const hasRevenue = event.status === "event_executed" || event.status === "distribution_executed" || event.status === "liquidation_countdown";
-  const hasDist = event.status === "distribution_executed" && event.distribution;
+  const hasRevenue = event.status === "LIVE" || event.status === "COMPLETED" || event.status === "CANCELLED";
+  const hasDist = event.status === "COMPLETED" && event.distribution;
   const payLink = `/dashboard/pay/${event.id}`;
 
   const investorPool = event.totalRevenue * (event.revenueSharePercent / 100);
@@ -82,7 +90,7 @@ export default function OrganizerEventDetail({ params }: { params: Promise<{ id:
               <div className="flex justify-between"><span className="text-text-secondary">Investor Pool ({event.revenueSharePercent}%)</span><span className="font-medium">{formatUSDC(investorPool)} USDC</span></div>
               <div className="flex justify-between"><span className="text-text-secondary">Lumio Fee</span><span className="font-medium">{formatUSDC(lumioFeeOnRevenue)} USDC</span></div>
             </div>
-            {event.status === "event_executed" && (
+            {event.status === "LIVE" && (
               <button
                 onClick={() => showToast("Event marked as executed! Distribution will be processed.")}
                 className="mt-4 w-full rounded-[var(--radius-btn)] bg-dominant py-2.5 text-sm font-bold text-white hover:bg-dominant-hover transition-colors"

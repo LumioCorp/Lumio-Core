@@ -48,6 +48,12 @@ const MAX_OPERATIONS_PER_TX = 100;
 export class DistributionService {
   /**
    * Calculates payout amounts for all token holders.
+   *
+   * NOTE: This is for revenue distribution (revenue share to token holders).
+   * The release of the TW escrow (investment USDC → organizer) is handled
+   * from the frontend via the TW SDK (approve + release flow).
+   * Revenue distribution is independent of the escrow release.
+   *
    * @param eventId - Event ID
    * @returns Payout calculation with per-holder amounts
    */

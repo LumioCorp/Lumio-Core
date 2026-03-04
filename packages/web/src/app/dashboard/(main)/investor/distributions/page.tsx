@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Inbox } from "lucide-react";
-import { myDistributions } from "@/data/mock";
+import { myDistributions as mockDistributions } from "@/data/mock";
 import { formatUSDC, formatDate } from "@/lib/utils";
+import type { DistributionRecord } from "@/types";
+
+// TODO: Replace mock seed with real API call once the distributions endpoint is live.
+// Future: useEffect(() => { apiClient.getMyDistributions().then(setDistributions) }, []);
 
 export default function Distributions() {
-  if (myDistributions.length === 0) {
+  const [distributions, setDistributions] = useState<DistributionRecord[]>(mockDistributions);
+
+  if (distributions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <Inbox className="h-12 w-12 text-text-tertiary mb-3" />
@@ -41,7 +48,7 @@ export default function Distributions() {
             </tr>
           </thead>
           <tbody>
-            {myDistributions.map((d) => (
+            {distributions.map((d) => (
               <tr key={d.eventId} className="border-b border-border last:border-0 hover:bg-bg-primary/50 transition-colors">
                 <td className="px-6 py-4">
                   <Link href={`/dashboard/investor/event/${d.eventId}`} className="font-medium text-text-primary hover:text-accent-blue">

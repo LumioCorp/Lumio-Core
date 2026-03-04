@@ -19,6 +19,7 @@ interface WalletContextValue {
   connect: () => Promise<string | null>;
   disconnect: () => void;
   refreshBalance: () => Promise<void>;
+  signTransaction: (xdr: string) => Promise<string>;
 }
 
 const WalletContext = createContext<WalletContextValue>({
@@ -30,6 +31,7 @@ const WalletContext = createContext<WalletContextValue>({
   connect: async () => null,
   disconnect: () => {},
   refreshBalance: async () => {},
+  signTransaction: async () => "",
 });
 
 export function useWallet() {
@@ -109,6 +111,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [refreshBalance]);
 
+  const signTransaction = useCallback(async (xdr: string): Promise<string> => {
+    const { StellarWalletsKit } = await import("@creit.tech/stellar-wallets-kit");
+    const { signedTxXdr } = await StellarWalletsKit.signTransaction(xdr);
+    return signedTxXdr;
+  }, []);
+
   const disconnect = useCallback(() => {
     setAddress(null);
     setUsdcBalance(0);
@@ -129,6 +137,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connect,
         disconnect,
         refreshBalance,
+        signTransaction,
       }}
     >
       {children}

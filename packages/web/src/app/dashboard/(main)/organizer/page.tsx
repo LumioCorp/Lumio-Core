@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, ChevronRight, Plus, Zap } from "lucide-react";
 import { motion } from "framer-motion";
-import { organizerStats, events, myOrganizedEvents } from "@/data/mock";
+import { organizerStats as mockOrganizerStats, events as mockEvents, myOrganizedEvents as mockMyOrganizedEvents } from "@/data/mock";
 import { formatUSDC, formatDate } from "@/lib/utils";
 import { ChartSparkline, ChartAreaInteractive } from "@/components/ui/Chart";
 import { ChartPieDonut } from "@/components/ui/ChartDonut";
@@ -168,21 +168,23 @@ function Metric({ label, value, bold }: { label: string; value: string; bold?: b
 // Etiquetas y estilos operativos por estado del evento
 // ─────────────────────────────────────────────────────────────────────────────
 const OPERATIONAL_LABELS: Record<EventStatus, string> = {
-  funding_open:          "Funding",
-  funding_successful:    "Ready to Execute",
-  event_executed:        "Event Live",
-  liquidation_countdown: "Liquidation",
-  distribution_executed: "Completed",
-  cancelled:             "Cancelled",
+  DRAFT:           "Draft",
+  ESCROW_DEPLOYED: "Escrow Ready",
+  FUNDING_OPEN:    "Funding",
+  FUNDED:          "Ready to Execute",
+  LIVE:            "Event Live",
+  CANCELLED:       "Cancelled",
+  COMPLETED:       "Completed",
 };
 
 const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; pulse?: string }> = {
-  funding_open:          { bg: "bg-blue-500/15",    text: "text-blue-400",    pulse: "bg-blue-400"   },
-  funding_successful:    { bg: "bg-violet-500/15",  text: "text-violet-400",  pulse: "bg-violet-400" },
-  event_executed:        { bg: "bg-amber-500/15",   text: "text-amber-400",   pulse: "bg-amber-400"  },
-  liquidation_countdown: { bg: "bg-orange-500/15",  text: "text-orange-400",  pulse: "bg-orange-400" },
-  distribution_executed: { bg: "bg-emerald-500/15", text: "text-emerald-400"                         },
-  cancelled:             { bg: "bg-red-500/15",     text: "text-red-400"                             },
+  DRAFT:           { bg: "bg-slate-500/15",   text: "text-slate-400"                          },
+  ESCROW_DEPLOYED: { bg: "bg-cyan-500/15",    text: "text-cyan-400",    pulse: "bg-cyan-400"  },
+  FUNDING_OPEN:    { bg: "bg-blue-500/15",    text: "text-blue-400",    pulse: "bg-blue-400"  },
+  FUNDED:          { bg: "bg-violet-500/15",  text: "text-violet-400",  pulse: "bg-violet-400"},
+  LIVE:            { bg: "bg-amber-500/15",   text: "text-amber-400",   pulse: "bg-amber-400" },
+  CANCELLED:       { bg: "bg-red-500/15",     text: "text-red-400"                            },
+  COMPLETED:       { bg: "bg-emerald-500/15", text: "text-emerald-400"                        },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -194,10 +196,10 @@ function OrganizerEventCard({ event, index }: { event: LumioEvent; index: number
   const style       = STATUS_STYLES[event.status];
   const hasPulse    = !!style.pulse;
 
-  const isFunding   = event.status === "funding_open";
-  const isFunded    = event.status === "funding_successful";
-  const isLive      = event.status === "event_executed";
-  const isCompleted = event.status === "distribution_executed";
+  const isFunding   = event.status === "FUNDING_OPEN";
+  const isFunded    = event.status === "FUNDED";
+  const isLive      = event.status === "LIVE";
+  const isCompleted = event.status === "COMPLETED";
 
   return (
     <motion.div
@@ -341,8 +343,9 @@ const ACTIVITY = [
 // ─────────────────────────────────────────────────────────────────────────────
 export default function OrganizerOverview() {
   const [range, setRange] = useState<TimeRange>("30d");
+  const [orgStats, setOrgStats] = useState(mockOrganizerStats);
+  const [orgEvents, setOrgEvents] = useState(() => mockEvents.filter((e) => mockMyOrganizedEvents.includes(e.id)));
 
-  const orgEvents    = events.filter((e) => myOrganizedEvents.includes(e.id));
   const totalTickets = orgEvents.reduce((sum, e) => sum + e.ticketsSold, 0);
 
   return (
@@ -353,7 +356,7 @@ export default function OrganizerOverview() {
         <KpiCard
           uid="org-raised"
           label="Total Raised"
-          target={organizerStats.totalFundsRaised}
+          target={orgStats.totalFundsRaised}
           unit="USDC"
           sparkData={SPARKLINES.totalRaised}
           color="#3b82f6"
@@ -364,7 +367,7 @@ export default function OrganizerOverview() {
         <KpiCard
           uid="org-active"
           label="Active Events"
-          target={organizerStats.activeEvents}
+          target={orgStats.activeEvents}
           isInt
           sparkData={SPARKLINES.activeEvents}
           color="#8b5cf6"
@@ -386,7 +389,7 @@ export default function OrganizerOverview() {
         <KpiCard
           uid="org-revenue"
           label="Total Revenue"
-          target={organizerStats.totalRevenue}
+          target={orgStats.totalRevenue}
           unit="USDC"
           sparkData={SPARKLINES.totalRevenue}
           color="#f59e0b"
@@ -460,7 +463,7 @@ export default function OrganizerOverview() {
               My Events
             </h2>
             <p className="mt-0.5 text-sm text-[#5A6068]">
-              {orgEvents.length} event{orgEvents.length !== 1 ? "s" : ""} · {organizerStats.activeEvents} active
+              {orgEvents.length} event{orgEvents.length !== 1 ? "s" : ""} · {orgStats.activeEvents} active
             </p>
           </div>
 

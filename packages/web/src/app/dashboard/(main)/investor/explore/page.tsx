@@ -1,13 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { events } from "@/data/mock";
+import { useState, useEffect } from "react";
+import * as api from "@/lib/api";
+import { events as mockEvents } from "@/data/mock";
+import type { LumioEvent } from "@/types";
 import EventCard from "@/components/dashboard/EventCard";
 import FilterBar from "@/components/investor/FilterBar";
 
 export default function ExploreEvents() {
+  const [events, setEvents] = useState<LumioEvent[]>(mockEvents);
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
+
+  useEffect(() => {
+    api
+      .getEvents()
+      .then((data) => setEvents(data as unknown as LumioEvent[]))
+      .catch(() => {
+        // API unavailable — keep mock data as fallback
+      });
+  }, []);
 
   const filtered = events.filter((e) => {
     if (category !== "all" && e.category !== category) return false;

@@ -19,7 +19,7 @@ enum UserRole {
 
 enum EventStatus {
   DRAFT
-  WALLET_CREATED
+  ESCROW_DEPLOYED
   FUNDING_OPEN
   FUNDED
   LIVE
@@ -56,16 +56,30 @@ model Event {
   id                     String      @id @default(cuid())
   name                   String
   description            String?
+  category               String?     @default("other")
+  location               String?
+  eventDate              DateTime?
+  fundingDeadline        DateTime?
+  imageUrl               String?
   fundingGoal            Decimal     @db.Decimal(18, 7) // USDC amount
   tokenPrice             Decimal     @db.Decimal(18, 7) // Price per token in USDC
   revenueSharePct        Decimal     @db.Decimal(5, 2)  // Percentage (0-100)
   status                 EventStatus @default(DRAFT)
+
+  // Token issuer wallet — generates and signs token issuance TXs only. Does NOT custody funds.
   stellarPublicKey       String?     @unique
-  stellarSecretEncrypted String?     // AES-256-CBC encrypted
+  stellarSecretEncrypted String?     // AES-256-CBC encrypted — for token issuance ONLY
+
   assetCode              String?     // e.g., "EVT001"
   totalTokensIssued      Decimal     @default(0) @db.Decimal(18, 7)
   totalRevenue           Decimal     @default(0) @db.Decimal(18, 7)
   ticketPrice            Decimal?    @db.Decimal(18, 7) // Price per ticket in USDC
+
+  // Trustless Work escrow — non-custodial on-chain escrow for investor USDC
+  escrowContractId       String?     @unique  // TW escrow Soroban contract address
+  escrowStatus           String?     @default("PENDING") // PENDING|DEPLOYED|FUNDED|MILESTONE_DONE|APPROVED|RELEASED|DISPUTED
+  organizerAddress       String?     // Stellar public key of the organizer (for TW roles)
+
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
@@ -82,11 +96,12 @@ model Event {
 }
 
 model Investment {
-  id              String   @id @default(cuid())
-  amountTokens    Decimal  @db.Decimal(18, 7)
-  usdcPaid        Decimal  @db.Decimal(18, 7)
-  stellarTxHash   String?  // Transaction hash for traceability
-  createdAt       DateTime @default(now())
+  id                  String   @id @default(cuid())
+  amountTokens        Decimal  @db.Decimal(18, 7)
+  usdcPaid            Decimal  @db.Decimal(18, 7)
+  stellarTxHash       String?  // Token issuance transaction hash
+  escrowFundingTxHash String?  // TX hash of the funding to TW escrow (separate from token issuance)
+  createdAt           DateTime @default(now())
 
   // Relations
   eventId         String

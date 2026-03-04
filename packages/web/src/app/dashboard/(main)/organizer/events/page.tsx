@@ -1,24 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { events, myOrganizedEvents } from "@/data/mock";
+import { events as mockEvents, myOrganizedEvents as mockMyOrganizedEvents } from "@/data/mock";
+import type { LumioEvent } from "@/types";
 import { formatUSDC, formatDate, fundingPercent, getCategoryGradient } from "@/lib/utils";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import ProgressBar from "@/components/dashboard/ProgressBar";
 
 function actionLabel(status: string) {
   switch (status) {
-    case "funding_open": return "View Details";
-    case "event_executed": return "View Revenue";
-    case "distribution_executed": return "View Summary";
+    case "FUNDING_OPEN": return "View Details";
+    case "LIVE": return "View Revenue";
+    case "COMPLETED": return "View Summary";
     default: return "View";
   }
 }
 
 export default function OrganizerEvents() {
-  const orgEvents = events.filter((e) => myOrganizedEvents.includes(e.id));
+  const [orgEvents] = useState<LumioEvent[]>(() => mockEvents.filter((e) => mockMyOrganizedEvents.includes(e.id)));
 
   return (
     <div className="space-y-6">
@@ -71,7 +73,7 @@ export default function OrganizerEvents() {
                 )}
               </div>
 
-              {event.status === "funding_open" && (
+              {event.status === "FUNDING_OPEN" && (
                 <div className="mt-4 max-w-md">
                   <ProgressBar value={pct} />
                   <span className="text-xs text-text-secondary mt-1 block">{pct}% funded</span>

@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { formatUSDC, getCategoryGradient } from "@/lib/utils";
+import { useWallet } from "@/components/ui/WalletProvider";
+import { useDeployEscrow } from "@/hooks/useEscrow";
+import * as api from "@/lib/api";
 import type { EventCategory } from "@/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -304,6 +307,8 @@ function PipelineModal({ submitState, activeStep, completedSteps }: PipelineModa
 // ─────────────────────────────────────────────────────────────────────────────
 export default function CreateEventForm() {
   const { showToast } = useToast();
+  const { address } = useWallet();
+  const { deploy } = useDeployEscrow();
 
   const [name,                setName]                = useState("My New Event");
   const [description,         setDescription]         = useState("An exciting event powered by Lumio.");
@@ -340,27 +345,52 @@ export default function CreateEventForm() {
     };
   }, [fundingTarget, pricePerToken, eventDate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!address) {
+      showToast("Please connect your wallet first");
+      return;
+    }
+
     setSubmitState("processing");
     setCompletedSteps([]);
     setActiveStep(0);
 
-    const t0 = STEP_DURATIONS[0];
-    const t1 = t0 + STEP_DURATIONS[1];
-    const t2 = t1 + STEP_DURATIONS[2];
+    try {
+      // Step 1: Create event + token issuer wallet in backend
+      const organizerUser = await api.createEvent({
+        name,
+        description,
+        fundingGoal: fundingTarget,
+        tokenPrice: pricePerToken,
+        revenueSharePct: revenueSharePercent,
+        organizerId: address,
+        organizerAddress: address,
+        category,
+        location,
+        eventDate,
+        fundingDeadline: computed.fundingDeadline,
+        ticketPrice: 15,
+      });
+      const eventId = (organizerUser as Record<string, unknown>).id as string;
 
-    setTimeout(() => {
+      // Initialize token issuer wallet
+      await api.initializeTokenIssuer(eventId);
+
       setCompletedSteps([0]);
       setActiveStep(1);
-    }, t0);
 
-    setTimeout(() => {
+      // Step 2: Deploy TW escrow (frontend signs XDR)
+      await deploy(eventId);
+
       setCompletedSteps([0, 1]);
       setActiveStep(2);
-    }, t1);
 
-    setTimeout(() => {
+      // Step 3: Fund wallet + setup asset + open funding
+      await api.fundWallet(eventId);
+      await api.setupAsset(eventId);
+      await api.openFunding(eventId);
+
       setCompletedSteps([0, 1, 2]);
       setActiveStep(-1);
       setSubmitState("success");
@@ -370,7 +400,12 @@ export default function CreateEventForm() {
         setCompletedSteps([]);
         showToast(`"${name || "Event"}" created successfully!`);
       }, 1_300);
-    }, t2);
+    } catch (err) {
+      setSubmitState("idle");
+      setCompletedSteps([]);
+      setActiveStep(-1);
+      showToast(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
   };
 
   return (

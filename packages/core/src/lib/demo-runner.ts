@@ -50,9 +50,6 @@ function logInfo(message: string): void {
   console.log(`  [i] ${message}`);
 }
 
-function logError(message: string): void {
-  console.log(`  [ERROR] ${message}`);
-}
 
 async function ensureOrganizerExists(): Promise<string> {
   const organizerAddress = Keypair.random().publicKey();
@@ -108,7 +105,7 @@ async function createDemoEvent(organizerId: string): Promise<string> {
 }
 
 async function initializeWallet(eventId: string): Promise<void> {
-  const event = await eventService.initializeWallet(eventId);
+  const event = await eventService.initializeTokenIssuer(eventId);
   logSuccess(`Wallet created: ${event.stellarPublicKey}`);
   logInfo(`  Asset Code: ${event.assetCode}`);
 }
@@ -141,13 +138,13 @@ async function simulateInvestments(eventId: string): Promise<void> {
     // Record the investment directly (simulating post-transaction)
     const usdcPaid = TOKENS_PER_INVESTOR * 10; // 10 USDC per token
 
-    await investmentService.recordInvestment(
+    await investmentService.recordInvestmentAndIssueTokens({
       eventId,
       investorAddress,
-      TOKENS_PER_INVESTOR,
+      tokenAmount: TOKENS_PER_INVESTOR,
       usdcPaid,
-      `demo_tx_invest_${i}_${Date.now()}`
-    );
+      escrowFundingTxHash: `demo_tx_invest_${i}_${Date.now()}`,
+    });
 
     logSuccess(`Investment ${i}: ${TOKENS_PER_INVESTOR} tokens (${usdcPaid} USDC)`);
     await sleep(100);
@@ -240,8 +237,10 @@ async function runDemo(): Promise<void> {
     logStep(4, "Configuring Asset & USDC Trustline");
     await setupAsset(eventId);
 
-    // Step 5: Open funding
-    logStep(5, "Opening Funding");
+    // Step 5: Register escrow and open funding
+    logStep(5, "Registering Escrow & Opening Funding");
+    await eventService.registerEscrow(eventId, `demo_escrow_${Date.now()}`);
+    logSuccess("Escrow registered (simulated)");
     await openFunding(eventId);
 
     // Step 6: Simulate investments

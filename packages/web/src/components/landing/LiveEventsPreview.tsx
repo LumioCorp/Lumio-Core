@@ -1,13 +1,24 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRight, ArrowRight } from "lucide-react";
-import { events } from "@/data/mock";
+import { events as mockEvents } from "@/data/mock";
+import * as api from "@/lib/api";
+import type { LumioEvent } from "@/types";
 import EventCard from "@/components/dashboard/EventCard";
 
 export default function LiveEventsPreview() {
-  const fundingOpen = events.filter((e) => e.status === "funding_open").slice(0, 3);
+  const [allEvents, setAllEvents] = useState<LumioEvent[]>(mockEvents);
+
+  useEffect(() => {
+    api.getEvents({ status: "FUNDING_OPEN" })
+      .then((data) => setAllEvents(data as unknown as LumioEvent[]))
+      .catch(() => {});
+  }, []);
+
+  const fundingOpen = allEvents.filter((e) => e.status === "FUNDING_OPEN").slice(0, 3);
 
   return (
     <section className="bg-[#1E1820]/60 py-24 px-6">

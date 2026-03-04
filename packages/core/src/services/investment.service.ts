@@ -2,29 +2,32 @@ import { Prisma, Investment, EventStatus } from "@prisma/client";
 import { prisma } from "../models/prisma.js";
 import { stellarService } from "./stellar.service.js";
 
-export interface PurchaseRequest {
+export interface RecordInvestmentRequest {
   eventId: string;
   investorAddress: string;
   tokenAmount: number;
+  usdcPaid: number;
+  escrowFundingTxHash: string;
 }
 
-export interface PurchaseTransaction {
-  xdr: string;
-  usdcAmount: string;
-  tokenAmount: string;
-  eventId: string;
-  investorAddress: string;
+export interface RecordInvestmentResult {
+  investment: Investment;
+  tokenTxHash: string;
 }
 
 export class InvestmentService {
   /**
-   * Generates a purchase transaction for token investment.
-   * Returns XDR for the investor to sign on frontend.
-   * @param request - Purchase request details
-   * @returns Transaction XDR and amounts
+   * Records an investment and issues tokens to the investor.
+   * Called after the frontend has funded the TW escrow with USDC.
+   *
+   * Two-step process:
+   * 1. Frontend funds TW escrow with USDC (non-custodial) → escrowFundingTxHash
+   * 2. Backend issues custom tokens to investor → tokenTxHash
    */
-  async purchaseTokens(request: PurchaseRequest): Promise<PurchaseTransaction> {
-    const { eventId, investorAddress, tokenAmount } = request;
+  async recordInvestmentAndIssueTokens(
+    request: RecordInvestmentRequest
+  ): Promise<RecordInvestmentResult> {
+    const { eventId, investorAddress, tokenAmount, usdcPaid, escrowFundingTxHash } = request;
 
     // Validate event exists and is open for funding
     const event = await prisma.event.findUnique({
@@ -52,38 +55,6 @@ export class InvestmentService {
       );
     }
 
-    // Build the atomic swap transaction
-    const { xdr, usdcAmount } = await stellarService.buildPurchaseTransaction(
-      eventId,
-      investorAddress,
-      tokenAmount
-    );
-
-    return {
-      xdr,
-      usdcAmount,
-      tokenAmount: tokenAmount.toFixed(7),
-      eventId,
-      investorAddress,
-    };
-  }
-
-  /**
-   * Records a completed investment after transaction confirmation.
-   * Should be called after verifying the transaction on Stellar.
-   * @param eventId - Event ID
-   * @param investorAddress - Investor's Stellar address
-   * @param tokenAmount - Tokens purchased
-   * @param usdcPaid - USDC paid
-   * @param stellarTxHash - Transaction hash for traceability
-   */
-  async recordInvestment(
-    eventId: string,
-    investorAddress: string,
-    tokenAmount: number,
-    usdcPaid: number,
-    stellarTxHash: string
-  ): Promise<Investment> {
     // Ensure investor exists in DB
     await prisma.user.upsert({
       where: { address: investorAddress },
@@ -94,14 +65,22 @@ export class InvestmentService {
       },
     });
 
-    // Create investment record
+    // Issue tokens to the investor via Stellar
+    const { txHash: tokenTxHash } = await stellarService.issueTokensToInvestor(
+      eventId,
+      investorAddress,
+      tokenAmount
+    );
+
+    // Create investment record with both tx hashes
     const investment = await prisma.investment.create({
       data: {
         eventId,
         investorAddress,
         amountTokens: new Prisma.Decimal(tokenAmount),
         usdcPaid: new Prisma.Decimal(usdcPaid),
-        stellarTxHash,
+        stellarTxHash: tokenTxHash,
+        escrowFundingTxHash,
       },
     });
 
@@ -116,17 +95,14 @@ export class InvestmentService {
     });
 
     // Check if funding goal reached
-    const event = await prisma.event.findUnique({
+    const updatedEvent = await prisma.event.findUnique({
       where: { id: eventId },
     });
 
-    if (event) {
-      const fundingGoal = Number(event.fundingGoal);
-      const tokenPrice = Number(event.tokenPrice);
-      const totalTokensAvailable = fundingGoal / tokenPrice;
-      const tokensIssued = Number(event.totalTokensIssued);
+    if (updatedEvent) {
+      const updatedTokensIssued = Number(updatedEvent.totalTokensIssued);
 
-      if (tokensIssued >= totalTokensAvailable) {
+      if (updatedTokensIssued >= totalTokensAvailable) {
         await prisma.event.update({
           where: { id: eventId },
           data: { status: EventStatus.FUNDED },
@@ -134,7 +110,7 @@ export class InvestmentService {
       }
     }
 
-    return investment;
+    return { investment, tokenTxHash };
   }
 
   /**
@@ -154,6 +130,7 @@ export class InvestmentService {
     return prisma.investment.findMany({
       where: { investorAddress },
       orderBy: { createdAt: "desc" },
+      include: { event: true },
     });
   }
 }

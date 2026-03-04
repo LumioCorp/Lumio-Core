@@ -1,19 +1,29 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import Link from "next/link";
 import { Minus, Plus, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { events } from "@/data/mock";
+import { events as mockEvents } from "@/data/mock";
+import * as api from "@/lib/api";
+import type { LumioEvent } from "@/types";
 import { formatUSDC, formatDate } from "@/lib/utils";
 import { ToastProvider, useToast } from "@/components/ui/Toast";
+import { useWallet } from "@/components/ui/WalletProvider";
 import LumioLogo from "@/components/ui/LumioLogo";
 
 function PayContent({ id }: { id: string }) {
-  const event = events.find((e) => e.id === id);
+  const [event, setEvent] = useState<LumioEvent | null>(() => mockEvents.find((e) => e.id === id) ?? null);
   const { showToast } = useToast();
+  const { address } = useWallet();
   const [quantity, setQuantity] = useState(1);
   const [paying, setPaying] = useState(false);
+
+  useEffect(() => {
+    api.getEvent(id)
+      .then((data) => setEvent(data as unknown as LumioEvent))
+      .catch(() => {});
+  }, [id]);
 
   if (!event) {
     return (
@@ -33,6 +43,8 @@ function PayContent({ id }: { id: string }) {
   const handlePay = () => {
     setPaying(true);
     setTimeout(() => {
+      api.recordTicketSale(id, { buyerAddress: address || "anonymous", usdcPaid: total })
+        .catch(() => {});
       setPaying(false);
       showToast(`Payment of ${formatUSDC(total)} USDC confirmed!`);
     }, 1_400);

@@ -33,12 +33,13 @@ export function getCategoryGradient(category: EventCategory): string {
 
 export function getStatusConfig(status: EventStatus): { label: string; color: string; bg: string } {
   const config: Record<EventStatus, { label: string; color: string; bg: string }> = {
-    funding_open: { label: "Funding Open", color: "text-blue-400", bg: "bg-blue-500/15" },
-    funding_successful: { label: "Funded", color: "text-green-400", bg: "bg-green-500/15" },
-    event_executed: { label: "Event Executed", color: "text-amber-400", bg: "bg-amber-500/15" },
-    liquidation_countdown: { label: "Liquidation", color: "text-orange-400", bg: "bg-orange-500/15" },
-    distribution_executed: { label: "Completed", color: "text-green-400", bg: "bg-green-500/15" },
-    cancelled: { label: "Cancelled", color: "text-red-400", bg: "bg-red-500/15" },
+    DRAFT: { label: "Draft", color: "text-slate-400", bg: "bg-slate-500/15" },
+    ESCROW_DEPLOYED: { label: "Escrow Ready", color: "text-cyan-400", bg: "bg-cyan-500/15" },
+    FUNDING_OPEN: { label: "Funding Open", color: "text-blue-400", bg: "bg-blue-500/15" },
+    FUNDED: { label: "Funded", color: "text-green-400", bg: "bg-green-500/15" },
+    LIVE: { label: "Live", color: "text-amber-400", bg: "bg-amber-500/15" },
+    COMPLETED: { label: "Completed", color: "text-green-400", bg: "bg-green-500/15" },
+    CANCELLED: { label: "Cancelled", color: "text-red-400", bg: "bg-red-500/15" },
   };
   return config[status];
 }

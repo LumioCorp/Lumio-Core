@@ -10,7 +10,7 @@ Lumio is an event tokenization platform on Stellar. Organizers raise funding by 
 |-----------|-------|------|
 | **Lumio Web** | Next.js 16.1, React 19, Tailwind 4 | `packages/web/` |
 | **Lumio Core** | Express, Prisma, Stellar SDK | `packages/core/` |
-| **Lumio Pay** | TBD (separate repo) | `lumio-pay/` |
+| **Lumio Pay** | Integrated in Web (ticket purchase page) | `packages/web/` |
 | **Escrow Layer** | Trustless Work API + Soroban | External service |
 | **Database** | PostgreSQL + Prisma ORM | Managed by Core |
 | **Blockchain** | Stellar Network (USDC) | — |
@@ -29,35 +29,30 @@ Lumio is an event tokenization platform on Stellar. Organizers raise funding by 
 ┌─────────────────────────────────────────────────────────────────┐
 │                      LUMIO WEB (Next.js)                        │
 │  Landing · Dashboards · Wallet Connection · Event Explorer      │
-│  Stellar Wallets Kit · Role Switch (Organizer / Investor)       │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │ REST API
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     LUMIO CORE (Express)                        │
-│  Event Service · Investment Service · Distribution Service      │
-│  Revenue Service · Stellar Service                              │
-│  ┌──────────┐                                                   │
-│  │  Prisma   │◄──── PostgreSQL                                  │
-│  └──────────┘                                                   │
-└──────┬────────────────────────┬─────────────────────────────────┘
-       │                        │
-       ▼                        ▼
-┌──────────────┐   ┌─────────────────────────────────────────────┐
-│ STELLAR      │   │          TRUSTLESS WORK (Soroban)           │
-│ NETWORK      │   │  Escrow Deploy · Fund · Approve · Release   │
-│ Token Issue  │   │  Dispute · Resolve · Milestone tracking     │
-│ USDC Transfers│  │  API: api.trustlesswork.com                 │
-└──────────────┘   │  SDK: @trustless-work/escrow                │
-                   └─────────────────────────────────────────────┘
-                           ▲
-                           │ Revenue deposits (USDC)
-                           │
-                   ┌───────┴───────┐
-                   │   LUMIO PAY   │
-                   │  Payment gate │
-                   │  for events   │
-                   └───────────────┘
+│  Stellar Wallets Kit · TW Escrow SDK · Lumio Pay                │
+│  Role Switch (Organizer / Investor)                             │
+│                                                                 │
+│  Frontend drives escrow operations:                             │
+│  Deploy → Fund → Milestone → Approve → Release                 │
+│  Then reports results to Lumio Core backend                     │
+└──────┬───────────────────────┬──────────────────────────────────┘
+       │ REST API              │ Direct (TW SDK)
+       ▼                       ▼
+┌──────────────────────┐   ┌─────────────────────────────────────┐
+│   LUMIO CORE         │   │      TRUSTLESS WORK (Soroban)       │
+│   (Express)          │   │  Escrow Deploy · Fund · Approve     │
+│                      │   │  Release · Dispute · Milestone      │
+│  Event Service       │   │  API: api.trustlesswork.com         │
+│  Investment Service  │   │  SDK: @trustless-work/escrow        │
+│  Distribution Svc    │   └─────────────────────────────────────┘
+│  Revenue Service     │
+│  Stellar Service     │   ┌─────────────────────────────────────┐
+│  (token issuance)    │──►│        STELLAR NETWORK              │
+│                      │   │  Token Issue · USDC Transfers       │
+│  ┌──────────┐        │   │  Horizon: horizon-testnet.stellar   │
+│  │  Prisma   │◄─ PG  │   └─────────────────────────────────────┘
+│  └──────────┘        │
+└──────────────────────┘
 ```
 
 ---
@@ -120,32 +115,32 @@ Each event creates a **Single-Release Escrow** via the Trustless Work API. This 
 
 ## 4. Lumio Pay
 
-**Lumio Pay** is a separate service (own repo, not yet built) that acts as the payment gateway for events.
+**Lumio Pay** is an integrated ticket purchase page within the Lumio web app, accessible at `/dashboard/pay/[eventId]`.
 
 ### Purpose
 
-- Process attendee payments (tickets, purchases) during events
-- Convert payments to USDC
-- Route all revenue directly into the event's escrow wallet
-- Ensure only verified revenue counts for distribution
+- Process attendee ticket payments during events
+- Accept USDC payments via connected wallet
+- Record ticket sales in the backend
+- Shareable link that organizers distribute for ticket sales
 
 ### How It Connects
 
 ```
-Attendee pays ──► Lumio Pay ──► USDC ──► Event Escrow (TW)
-                  (payment       (on Stellar)
-                   gateway)
+Attendee ──► /dashboard/pay/[id] ──► Connect wallet ──► Pay USDC ──► api.recordTicketSale()
+                                                                          │
+                                                                     Backend tracks revenue
 ```
 
-### Key Requirements
+### Key Features
 
-| Requirement | Detail |
-|-------------|--------|
-| Input | Attendee payments (fiat or crypto) |
-| Output | USDC deposited to event escrow address |
-| Tracking | Each payment linked to event ID |
-| Integrity | Only revenue through Lumio Pay is valid for distribution |
-| Scope MVP | Accept USDC payments, deposit to escrow |
+| Feature | Detail |
+|---------|--------|
+| Input | USDC from attendee's Stellar wallet |
+| Output | Ticket sale recorded in DB, revenue tracked per event |
+| Tracking | Each payment linked to event ID + buyer address |
+| UX | Quantity selector, animated payment flow, toast confirmation |
+| Scope MVP | Accept USDC payments, record in backend |
 
 ---
 
@@ -181,9 +176,17 @@ Attendee pays ──► Lumio Pay ──► USDC ──► Event Escrow (TW)
 ### Event Status Flow
 
 ```
-DRAFT → WALLET_CREATED → FUNDING_OPEN → FUNDED → LIVE → COMPLETED
-                                │                          │
-                                └──► CANCELLED ◄───────────┘
+DRAFT → ESCROW_DEPLOYED → FUNDING_OPEN → FUNDED → LIVE → COMPLETED
+                                  │                          │
+                                  └──► CANCELLED ◄───────────┘
+```
+
+### Escrow Status (TW escrow lifecycle, tracked separately)
+
+```
+PENDING → DEPLOYED → FUNDED → MILESTONE_DONE → APPROVED → RELEASED
+                                                    │
+                                                    └──► DISPUTED
 ```
 
 ---
@@ -261,10 +264,12 @@ Organizer receives:   3,325 USDC  + collateral returned
 
 | Aspect | Approach |
 |--------|----------|
-| Fund custody | Non-custodial via Trustless Work escrow |
-| Fund release | Requires role-based signatures (XDR signing) |
-| Revenue validation | Only Lumio Pay deposits count |
+| USDC fund custody | Non-custodial via Trustless Work escrow on-chain |
+| Token issuance | Minimal custodial: backend holds encrypted issuer wallet keys (AES-256-CBC), used ONLY for token minting |
+| Fund release | Requires role-based signatures (XDR signing via client wallet) |
+| Revenue validation | Ticket sales recorded via backend API |
 | Parameter immutability | Escrow params locked after funding |
-| KYC | Required for organizers and investors |
+| Secret key storage | Issuer wallet secrets encrypted at rest, never exposed to frontend |
+| Frontend-driven escrow | Frontend calls TW SDK directly, then reports to backend for tracking |
 | Fraud prevention | Organizer collateral (10-20% of funding target) |
-| Dispute resolution | Automatic cancellation + force majeure path |
+| Dispute resolution | TW dispute mechanism + force majeure path |

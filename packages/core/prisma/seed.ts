@@ -31,6 +31,11 @@ async function main() {
       ticketPrice: 15, // 15 USDC per ticket
       status: EventStatus.DRAFT,
       organizerId: organizer.id,
+      organizerAddress: "GDEMO_ORGANIZER_ADDRESS_PLACEHOLDER_56CHARS",
+      category: "gastronomy",
+      location: "Centro de la Ciudad",
+      eventDate: new Date("2026-06-15"),
+      fundingDeadline: new Date("2026-06-01"),
     },
   });
   console.log(`Created event: ${demoEvent.name} (${demoEvent.id})`);
@@ -79,6 +84,8 @@ async function main() {
   console.log(`  - Revenue Share: ${demoEvent.revenueSharePct}%`);
   console.log(`  - Ticket Price: ${demoEvent.ticketPrice} USDC`);
   console.log(`  - Status: ${demoEvent.status}`);
+  console.log(`  - Category: ${demoEvent.category}`);
+  console.log(`  - Location: ${demoEvent.location}`);
   console.log(`  - Total Tokens Available: ${Number(demoEvent.fundingGoal) / Number(demoEvent.tokenPrice)}`);
   console.log("\nTo continue with demo flow:");
   console.log("  1. npm run dev");

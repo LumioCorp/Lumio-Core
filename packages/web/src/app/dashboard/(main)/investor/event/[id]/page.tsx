@@ -1,11 +1,13 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Star, Users, MapPin, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
-import { events, myInvestments } from "@/data/mock";
+import * as api from "@/lib/api";
+import { events as mockEvents, myInvestments as mockInvestments } from "@/data/mock";
+import type { LumioEvent, Investment } from "@/types";
 import { formatUSDC, formatDate, fundingPercent, getCategoryGradient } from "@/lib/utils";
 import { CATEGORY_COLORS } from "@/lib/constants";
 import StatusBadge from "@/components/dashboard/StatusBadge";
@@ -15,8 +17,97 @@ import { cn } from "@/lib/utils";
 
 export default function InvestorEventDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const event = events.find((e) => e.id === id);
-  const investment = myInvestments.find((inv) => inv.eventId === id);
+
+  const [event, setEvent] = useState<LumioEvent | null>(
+    () => mockEvents.find((e) => e.id === id) ?? null
+  );
+  const [investment, setInvestment] = useState<Investment | undefined>(
+    () => mockInvestments.find((inv) => inv.eventId === id)
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchEvent() {
+      try {
+        const data = await api.getEventFull(id);
+
+        if (cancelled) return;
+
+        const mapped: LumioEvent = {
+          id: data.id as string,
+          name: data.name as string,
+          description: (data.description as string) ?? "",
+          category: (data.category as LumioEvent["category"]) ?? "other",
+          location: (data.location as string) ?? "",
+          imageUrl: (data.imageUrl as string) ?? "",
+          organizer: {
+            name: (data.organizerName as string) ?? (data.organizer as Record<string, unknown>)?.name as string ?? "",
+            walletAddress: (data.organizerAddress as string) ?? (data.organizer as Record<string, unknown>)?.walletAddress as string ?? "",
+            rating: Number((data.organizer as Record<string, unknown>)?.rating ?? 0),
+            eventsCompleted: Number((data.organizer as Record<string, unknown>)?.eventsCompleted ?? 0),
+          },
+          eventDate: (data.eventDate as string) ?? "",
+          fundingDeadline: (data.fundingDeadline as string) ?? "",
+          liquidationDeadline: (data.liquidationDeadline as string) ?? "",
+          fundingTarget: Number(data.fundingGoal ?? data.fundingTarget ?? 0),
+          tokenSupply: Number(data.tokenSupply ?? 0),
+          pricePerToken: Number(data.tokenPrice ?? data.pricePerToken ?? 0),
+          revenueSharePercent: Number(data.revenueSharePct ?? data.revenueSharePercent ?? 0),
+          lumioFeePercent: Number(data.lumioFeePercent ?? data.lumioFeePct ?? 5),
+          collateralPercent: Number(data.collateralPercent ?? 0),
+          collateralAmount: Number(data.collateralAmount ?? 0),
+          maxPerWalletPercent: Number(data.maxPerWalletPercent ?? 10),
+          status: (data.status as LumioEvent["status"]) ?? "DRAFT",
+          totalFunded: Number(data.totalFunded ?? 0),
+          tokensSold: Number(data.tokensSold ?? 0),
+          investorCount: Number(data.investorCount ?? 0),
+          totalRevenue: Number(data.totalRevenue ?? 0),
+          ticketsSold: Number(data.ticketsSold ?? 0),
+          ticketPrice: Number(data.ticketPrice ?? 0),
+          escrowContractId: data.escrowContractId as string | undefined,
+          escrowStatus: data.escrowStatus as string | undefined,
+          organizerAddress: data.organizerAddress as string | undefined,
+          assetCode: data.assetCode as string | undefined,
+          distribution: data.distribution
+            ? {
+                totalDistributed: Number((data.distribution as Record<string, unknown>).totalDistributed ?? 0),
+                lumioFee: Number((data.distribution as Record<string, unknown>).lumioFee ?? 0),
+                organizerReceived: Number((data.distribution as Record<string, unknown>).organizerReceived ?? 0),
+                payoutPerToken: Number((data.distribution as Record<string, unknown>).payoutPerToken ?? 0),
+              }
+            : undefined,
+        };
+
+        setEvent(mapped);
+
+        // Map investment from the full response if it includes viewer investment data
+        if (data.myInvestment) {
+          const inv = data.myInvestment as Record<string, unknown>;
+          setInvestment({
+            eventId: id,
+            eventName: mapped.name,
+            tokensOwned: Number(inv.tokensOwned ?? inv.tokenAmount ?? 0),
+            totalInvested: Number(inv.totalInvested ?? inv.usdcPaid ?? 0),
+            status: mapped.status,
+            estimatedPayout: Number(inv.estimatedPayout ?? 0),
+            actualPayout: inv.actualPayout != null ? Number(inv.actualPayout) : undefined,
+            roi: inv.roi != null ? Number(inv.roi) : undefined,
+            purchaseDate: (inv.purchaseDate as string) ?? (inv.createdAt as string) ?? "",
+            escrowFundingTxHash: inv.escrowFundingTxHash as string | undefined,
+          });
+        }
+      } catch {
+        // API unavailable — keep mock data that was set as initial state
+      }
+    }
+
+    fetchEvent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   if (!event) {
     return (
@@ -30,8 +121,8 @@ export default function InvestorEventDetail({ params }: { params: Promise<{ id: 
   }
 
   const pct = fundingPercent(event.totalFunded, event.fundingTarget);
-  const hasRevenue = event.status === "event_executed" || event.status === "distribution_executed" || event.status === "liquidation_countdown";
-  const hasDist = event.status === "distribution_executed" && event.distribution;
+  const hasRevenue = event.status === "LIVE" || event.status === "COMPLETED" || event.status === "CANCELLED";
+  const hasDist = event.status === "COMPLETED" && event.distribution;
 
   const projectedPayoutPerToken = hasRevenue && event.tokenSupply > 0
     ? ((event.totalRevenue * (event.revenueSharePercent / 100)) * (1 - event.lumioFeePercent / 100)) / event.tokenSupply

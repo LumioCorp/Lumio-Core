@@ -1,10 +1,12 @@
+// Backend-aligned event statuses
 export type EventStatus =
-  | "funding_open"
-  | "funding_successful"
-  | "event_executed"
-  | "liquidation_countdown"
-  | "distribution_executed"
-  | "cancelled";
+  | "DRAFT"
+  | "ESCROW_DEPLOYED"
+  | "FUNDING_OPEN"
+  | "FUNDED"
+  | "LIVE"
+  | "COMPLETED"
+  | "CANCELLED";
 
 export type EventCategory = "gastronomy" | "music" | "sports" | "culture" | "other";
 
@@ -43,6 +45,12 @@ export interface LumioEvent {
   ticketsSold: number;
   ticketPrice: number;
 
+  // Escrow fields
+  escrowContractId?: string;
+  escrowStatus?: string;
+  organizerAddress?: string;
+  assetCode?: string;
+
   distribution?: {
     totalDistributed: number;
     lumioFee: number;
@@ -61,6 +69,7 @@ export interface Investment {
   actualPayout?: number;
   roi?: number;
   purchaseDate: string;
+  escrowFundingTxHash?: string;
 }
 
 export interface DistributionRecord {

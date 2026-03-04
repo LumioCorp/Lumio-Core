@@ -18,7 +18,7 @@ interface EventCardProps {
 
 export default function EventCard({ event, href, index = 0 }: EventCardProps) {
   const pct = fundingPercent(event.totalFunded, event.fundingTarget);
-  const muted = event.status === "distribution_executed" || event.status === "cancelled";
+  const muted = event.status === "COMPLETED" || event.status === "CANCELLED";
 
   return (
     <motion.div
