@@ -301,6 +301,76 @@ export class StellarService {
       );
     }
   }
+
+  /**
+   * Builds an unsigned XDR for transferring USDC from a buyer to the event wallet.
+   * The buyer signs this XDR client-side via their connected wallet.
+   */
+  async buildTicketPaymentXdr(
+    eventId: string,
+    buyerAddress: string,
+    usdcAmount: number
+  ): Promise<{ xdr: string; destinationAddress: string }> {
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new StellarError(`Event not found: ${eventId}`, "EVENT_NOT_FOUND");
+    }
+
+    if (!event.stellarPublicKey) {
+      throw new StellarError("Event wallet not initialized", "WALLET_NOT_INITIALIZED");
+    }
+
+    logger.info("Building ticket payment XDR", {
+      eventId,
+      buyerAddress,
+      usdcAmount,
+      destination: event.stellarPublicKey,
+    });
+
+    try {
+      const server = getHorizonServer();
+      const networkPassphrase = getNetworkPassphrase();
+      const usdcAsset = getUSDCAsset();
+
+      const buyerAccount = await server.loadAccount(buyerAddress);
+
+      const transaction = new TransactionBuilder(buyerAccount, {
+        fee: "100000",
+        networkPassphrase,
+      })
+        .addOperation(
+          Operation.payment({
+            destination: event.stellarPublicKey,
+            asset: usdcAsset,
+            amount: usdcAmount.toFixed(7),
+          })
+        )
+        .setTimeout(120)
+        .build();
+
+      const xdr = transaction.toXDR();
+
+      return { xdr, destinationAddress: event.stellarPublicKey };
+    } catch (error) {
+      if (error instanceof StellarError) throw error;
+
+      const message = error instanceof Error ? error.message : String(error);
+      logger.error("Failed to build ticket payment XDR", {
+        eventId,
+        buyerAddress,
+        error: message,
+      });
+
+      throw new StellarError(
+        `Failed to build payment transaction: ${message}`,
+        "TX_BUILD_FAILED",
+        true
+      );
+    }
+  }
 }
 
 export const stellarService = new StellarService();

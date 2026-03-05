@@ -693,3 +693,70 @@ eventsRouter.post("/:id/ticket", async (req: Request, res: Response) => {
     });
   }
 });
+
+/**
+ * POST /api/events/:id/build-ticket-tx
+ * Builds an unsigned XDR for a USDC ticket payment from buyer to event wallet.
+ */
+const buildTicketTxSchema = z.object({
+  buyerAddress: z.string().min(56).max(56),
+  ticketCount: z.number().int().positive(),
+});
+
+eventsRouter.post("/:id/build-ticket-tx", async (req: Request, res: Response) => {
+  try {
+    const { id } = eventIdSchema.parse(req.params);
+    const { buyerAddress, ticketCount } = buildTicketTxSchema.parse(req.body);
+
+    const event = await eventService.getEvent(id);
+
+    if (!event) {
+      res.status(404).json({
+        success: false,
+        error: "Event not found",
+      });
+      return;
+    }
+
+    if (!event.ticketPrice) {
+      res.status(400).json({
+        success: false,
+        error: "Event does not have a ticket price",
+      });
+      return;
+    }
+
+    const usdcAmount = Number(event.ticketPrice) * ticketCount;
+
+    const { xdr, destinationAddress } =
+      await stellarService.buildTicketPaymentXdr(id, buyerAddress, usdcAmount);
+
+    res.json({
+      success: true,
+      data: { xdr, destinationAddress, usdcAmount },
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        error: "Validation error",
+        details: error.errors,
+      });
+      return;
+    }
+
+    if (error instanceof Error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
+      return;
+    }
+
+    console.error("Error building ticket tx:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
